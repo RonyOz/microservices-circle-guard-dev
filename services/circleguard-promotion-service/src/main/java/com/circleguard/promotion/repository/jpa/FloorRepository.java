@@ -1,4 +1,4 @@
-package com.circleguard.promotion.repository;
+package com.circleguard.promotion.repository.jpa;
 
 import com.circleguard.promotion.model.Floor;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,8 +1,8 @@
 package com.circleguard.promotion.service;
 
 import com.circleguard.promotion.model.Building;
-import com.circleguard.promotion.repository.BuildingRepository;
-import com.circleguard.promotion.repository.FloorRepository;
+import com.circleguard.promotion.repository.jpa.BuildingRepository;
+import com.circleguard.promotion.repository.jpa.FloorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

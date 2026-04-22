@@ -1,7 +1,7 @@
 package com.circleguard.promotion.service;
 
 import com.circleguard.promotion.model.graph.*;
-import com.circleguard.promotion.repository.UserNodeRepository;
+import com.circleguard.promotion.repository.graph.UserNodeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Service;

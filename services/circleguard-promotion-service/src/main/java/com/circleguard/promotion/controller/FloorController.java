@@ -38,7 +38,8 @@ public class FloorController {
         Floor floor = floorService.updateFloor(
                 id,
                 (Integer) request.get("floorNumber"),
-                (String) request.get("name")
+                (String) request.get("name"),
+                (String) request.get("floorPlanUrl")
         );
         return ResponseEntity.ok(floor);
     }

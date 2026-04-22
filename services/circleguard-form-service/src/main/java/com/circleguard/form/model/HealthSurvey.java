@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.UUID;
 import java.time.LocalDate;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "health_surveys")
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class HealthSurvey {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
