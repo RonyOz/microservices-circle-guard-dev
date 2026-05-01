@@ -1,0 +1,111 @@
+def SERVICE_NAME = env.JOB_NAME.tokenize('/')[0]
+def REGISTRY     = 'registry.digitalocean.com/circleguard'
+def IMAGE_TAG    = "sha-${env.GIT_COMMIT.take(7)}"
+def IMAGE_FULL   = "${REGISTRY}/${SERVICE_NAME}:${IMAGE_TAG}"
+
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        timeout(time: 30, unit: 'MINUTES')
+        disableConcurrentBuilds()
+    }
+
+    stages {
+        stage('Test') {
+            steps {
+                sh """
+                    docker run --rm \
+                        -v "\${WORKSPACE}:/workspace" \
+                        -w /workspace \
+                        eclipse-temurin:21-jdk-jammy \
+                        ./gradlew :services:${SERVICE_NAME}:test --no-daemon
+                """
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true,
+                          testResults: "services/${SERVICE_NAME}/build/test-results/**/*.xml"
+                }
+            }
+        }
+
+        stage('Build & Push') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docr-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh """
+                        echo "\${DOCKER_PASS}" | docker login registry.digitalocean.com \
+                            -u "\${DOCKER_USER}" --password-stdin
+
+                        docker build \
+                            -f services/${SERVICE_NAME}/Dockerfile \
+                            -t ${IMAGE_FULL} \
+                            .
+
+                        docker push ${IMAGE_FULL}
+                    """
+                }
+            }
+        }
+
+        stage('Deploy: dev') {
+            when { branch 'develop' }
+            steps {
+                build job: 'circleguard/deploy-dev',
+                      parameters: [
+                          string(name: 'SERVICE',   value: SERVICE_NAME),
+                          string(name: 'IMAGE_TAG', value: IMAGE_TAG)
+                      ],
+                      wait: false
+            }
+        }
+
+        stage('Deploy: stage') {
+            when { branch pattern: 'release/.*', comparator: 'REGEXP' }
+            steps {
+                build job: 'circleguard/deploy-stage',
+                      parameters: [
+                          string(name: 'SERVICE',   value: SERVICE_NAME),
+                          string(name: 'IMAGE_TAG', value: IMAGE_TAG)
+                      ],
+                      wait: false
+            }
+        }
+
+        stage('Deploy: prod') {
+            when { branch 'main' }
+            steps {
+                script {
+                    def version = sh(
+                        script: "git describe --tags --match 'v*' --abbrev=0 2>/dev/null || echo '1.0.0'",
+                        returnStdout: true
+                    ).trim().replaceAll('^v', '')
+
+                    build job: 'circleguard/deploy-prod',
+                          parameters: [
+                              string(name: 'SERVICE',    value: SERVICE_NAME),
+                              string(name: 'IMAGE_TAG',  value: IMAGE_TAG),
+                              string(name: 'GIT_COMMIT', value: env.GIT_COMMIT),
+                              string(name: 'VERSION',    value: version)
+                          ],
+                          wait: false
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "PIPELINE FAILED — job: ${env.JOB_NAME}, branch: ${env.BRANCH_NAME}"
+        }
+        always {
+            sh "docker rmi ${IMAGE_FULL} || true"
+            cleanWs()
+        }
+    }
+}
