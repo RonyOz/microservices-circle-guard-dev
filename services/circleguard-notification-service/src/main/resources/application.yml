@@ -2,7 +2,7 @@ spring:
   application:
     name: circleguard-notification-service
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
       group-id: notification-group
       auto-offset-reset: earliest
@@ -10,11 +10,11 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
 jwt:
-  secret: "my-super-secret-dev-key-32-chars-long-12345678"
+  secret: "${JWT_SECRET:my-super-secret-dev-key-32-chars-long-12345678}"
   expiration: 3600000
 
 qr:
-  secret: "my-qr-secret-key-for-dev-1234567890"
+  secret: "${QR_SECRET:my-qr-secret-key-for-dev-1234567890}"
   expiration: 300
 
 server:
