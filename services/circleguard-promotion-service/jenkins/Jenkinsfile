@@ -1,4 +1,5 @@
-def SERVICE_NAME = env.JOB_NAME.tokenize('/')[-2]
+def SERVICE_NAME = env.JOB_NAME.tokenize('/')[-2]          // e.g. "auth-service"
+def SERVICE_DIR  = "circleguard-${SERVICE_NAME}"            // e.g. "circleguard-auth-service" (Gradle project name)
 def REGISTRY     = 'registry.digitalocean.com/circleguard'
 def IMAGE_TAG    = ''
 def IMAGE_FULL   = ''
@@ -30,13 +31,13 @@ pipeline {
                         -v gradle-cache:/root/.gradle \
                         -w /workspace \
                         eclipse-temurin:21-jdk-jammy \
-                        ./gradlew :services:${SERVICE_NAME}:test --no-daemon
+                        ./gradlew :services:${SERVICE_DIR}:test --no-daemon
                 """
             }
             post {
                 always {
                     junit allowEmptyResults: true,
-                          testResults: "services/${SERVICE_NAME}/build/test-results/**/*.xml"
+                          testResults: "services/${SERVICE_DIR}/build/test-results/**/*.xml"
                 }
             }
         }
@@ -52,7 +53,7 @@ pipeline {
                             -u "\${DO_TOKEN}" --password-stdin
 
                         DOCKER_BUILDKIT=1 docker build \
-                            -f services/${SERVICE_NAME}/Dockerfile \
+                            -f services/${SERVICE_DIR}/Dockerfile \
                             -t ${IMAGE_FULL} \
                             .
 
