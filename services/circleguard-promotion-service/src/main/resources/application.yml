@@ -32,4 +32,4 @@ spring:
       port: ${REDIS_PORT:6379}
 
 server:
-  port: 8088
+  port: 8086
