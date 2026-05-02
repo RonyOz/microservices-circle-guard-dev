@@ -1,4 +1,4 @@
-def SERVICE_NAME = env.JOB_NAME.tokenize('/')[0]
+def SERVICE_NAME = env.JOB_NAME.tokenize('/')[-2]
 def REGISTRY     = 'registry.digitalocean.com/circleguard'
 def IMAGE_TAG    = ''
 def IMAGE_FULL   = ''
