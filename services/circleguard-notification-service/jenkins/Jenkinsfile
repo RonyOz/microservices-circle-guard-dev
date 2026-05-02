@@ -28,7 +28,7 @@ pipeline {
                 sh """
                     docker run --rm \
                         -v "\${WORKSPACE}:/workspace" \
-                        -v gradle-cache:/root/.gradle \
+                        -v gradle-cache-${SERVICE_NAME}:/root/.gradle \
                         -w /workspace \
                         eclipse-temurin:21-jdk-jammy \
                         ./gradlew :services:${SERVICE_DIR}:test --no-daemon
