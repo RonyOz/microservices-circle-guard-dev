@@ -63,7 +63,7 @@ pipeline {
         }
 
         stage('Deploy: dev') {
-            when { branch 'develop' }
+            when { branch 'dev' }
             steps {
                 build job: 'circleguard/deploy-dev',
                       parameters: [
