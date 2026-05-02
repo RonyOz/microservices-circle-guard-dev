@@ -42,14 +42,13 @@ pipeline {
 
         stage('Build & Push') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'docr-credentials',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
+                withCredentials([string(
+                    credentialsId: 'do-api-token',
+                    variable: 'DO_TOKEN'
                 )]) {
                     sh """
-                        echo "\${DOCKER_PASS}" | docker login registry.digitalocean.com \
-                            -u "\${DOCKER_USER}" --password-stdin
+                        echo "\${DO_TOKEN}" | docker login registry.digitalocean.com \
+                            -u "\${DO_TOKEN}" --password-stdin
 
                         docker build \
                             -f services/${SERVICE_NAME}/Dockerfile \
