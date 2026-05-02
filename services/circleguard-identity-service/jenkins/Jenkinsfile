@@ -65,7 +65,7 @@ pipeline {
         stage('Deploy: dev') {
             when { branch 'dev' }
             steps {
-                build job: 'circleguard/deploy-dev',
+                build job: 'circleguard-ops/circleguard-deploy-dev',
                       parameters: [
                           string(name: 'SERVICE',   value: SERVICE_NAME),
                           string(name: 'IMAGE_TAG', value: IMAGE_TAG)
@@ -77,7 +77,7 @@ pipeline {
         stage('Deploy: stage') {
             when { branch pattern: 'release/.*', comparator: 'REGEXP' }
             steps {
-                build job: 'circleguard/deploy-stage',
+                build job: 'circleguard-ops/circleguard-deploy-stage',
                       parameters: [
                           string(name: 'SERVICE',   value: SERVICE_NAME),
                           string(name: 'IMAGE_TAG', value: IMAGE_TAG)
@@ -95,7 +95,7 @@ pipeline {
                         returnStdout: true
                     ).trim().replaceAll('^v', '')
 
-                    build job: 'circleguard/deploy-prod',
+                    build job: 'circleguard-ops/circleguard-deploy-prod',
                           parameters: [
                               string(name: 'SERVICE',    value: SERVICE_NAME),
                               string(name: 'IMAGE_TAG',  value: IMAGE_TAG),
