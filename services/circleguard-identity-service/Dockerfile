@@ -4,7 +4,8 @@ COPY gradlew gradlew
 COPY gradle gradle
 COPY build.gradle.kts settings.gradle.kts ./
 COPY services/circleguard-identity-service services/circleguard-identity-service
-RUN chmod +x gradlew && \
+RUN --mount=type=cache,target=/root/.gradle \
+    chmod +x gradlew && \
     ./gradlew :services:circleguard-identity-service:bootJar -x test --no-daemon
 
 FROM eclipse-temurin:21-jre-jammy

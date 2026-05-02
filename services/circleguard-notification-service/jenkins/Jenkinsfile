@@ -27,6 +27,7 @@ pipeline {
                 sh """
                     docker run --rm \
                         -v "\${WORKSPACE}:/workspace" \
+                        -v gradle-cache:/root/.gradle \
                         -w /workspace \
                         eclipse-temurin:21-jdk-jammy \
                         ./gradlew :services:${SERVICE_NAME}:test --no-daemon
@@ -50,7 +51,7 @@ pipeline {
                         echo "\${DO_TOKEN}" | docker login registry.digitalocean.com \
                             -u "\${DO_TOKEN}" --password-stdin
 
-                        docker build \
+                        DOCKER_BUILDKIT=1 docker build \
                             -f services/${SERVICE_NAME}/Dockerfile \
                             -t ${IMAGE_FULL} \
                             .
