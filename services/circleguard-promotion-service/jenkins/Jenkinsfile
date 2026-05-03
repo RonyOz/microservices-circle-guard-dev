@@ -29,6 +29,7 @@ pipeline {
                     docker run --rm \
                         -v "\${WORKSPACE}:/workspace" \
                         -v gradle-cache-shared:/root/.gradle \
+                        -v /var/run/docker.sock:/var/run/docker.sock \
                         -w /workspace \
                         eclipse-temurin:21-jdk-jammy \
                         ./gradlew :services:${SERVICE_DIR}:test --no-daemon --build-cache --parallel
