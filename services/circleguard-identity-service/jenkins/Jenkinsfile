@@ -28,10 +28,10 @@ pipeline {
                 sh """
                     docker run --rm \
                         -v "\${WORKSPACE}:/workspace" \
-                        -v gradle-cache-${SERVICE_NAME}:/root/.gradle \
+                        -v gradle-cache-shared:/root/.gradle \
                         -w /workspace \
                         eclipse-temurin:21-jdk-jammy \
-                        ./gradlew :services:${SERVICE_DIR}:test --no-daemon
+                        ./gradlew :services:${SERVICE_DIR}:test --no-daemon --build-cache --parallel
                 """
             }
             post {
@@ -49,15 +49,23 @@ pipeline {
                     variable: 'DO_TOKEN'
                 )]) {
                     sh """
+                        CACHE_IMAGE=${REGISTRY_REPO}:${SERVICE_NAME}-buildcache
+
                         echo "\${DO_TOKEN}" | docker login registry.digitalocean.com \
                             -u "\${DO_TOKEN}" --password-stdin
+
+                        docker pull \$CACHE_IMAGE || true
 
                         DOCKER_BUILDKIT=1 docker build \
                             -f services/${SERVICE_DIR}/Dockerfile \
                             -t ${IMAGE_FULL} \
+                            --build-arg BUILDKIT_INLINE_CACHE=1 \
+                            --cache-from \$CACHE_IMAGE \
                             .
 
+                        docker tag ${IMAGE_FULL} \$CACHE_IMAGE
                         docker push ${IMAGE_FULL}
+                        docker push \$CACHE_IMAGE
                     """
                 }
             }

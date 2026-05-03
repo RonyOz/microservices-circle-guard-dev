@@ -1,0 +1,14 @@
+.git
+.github
+.agent
+.vscode
+.gradle
+build
+mobile
+docs
+design-assets
+dashboard_test_output.txt
+docker-compose.dev.yml
+init-db.sql
+**/build
+**/.DS_Store
