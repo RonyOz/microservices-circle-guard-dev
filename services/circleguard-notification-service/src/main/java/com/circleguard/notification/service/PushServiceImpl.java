@@ -15,15 +15,14 @@ import java.util.concurrent.CompletableFuture;
 public class PushServiceImpl implements PushService {
 
     private final WebClient webClient;
+    private final String gotifyToken;
 
-    @Value("${push.gotify.url:http://localhost:8080}")
-    private String gotifyUrl;
-
-    @Value("${push.gotify.token:MOCK_TOKEN}")
-    private String gotifyToken;
-
-    public PushServiceImpl(WebClient.Builder webClientBuilder) {
+    public PushServiceImpl(
+            WebClient.Builder webClientBuilder,
+            @Value("${push.gotify.url:http://localhost:8080}") String gotifyUrl,
+            @Value("${push.gotify.token:MOCK_TOKEN}") String gotifyToken) {
         this.webClient = webClientBuilder.baseUrl(gotifyUrl).build();
+        this.gotifyToken = gotifyToken;
     }
 
     @Override
