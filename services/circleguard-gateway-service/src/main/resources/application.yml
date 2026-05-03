@@ -4,7 +4,7 @@ spring:
   data:
     redis:
       host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      port: 6379
 
 jwt:
   secret: "${JWT_SECRET:my-super-secret-dev-key-32-chars-long-12345678}"
