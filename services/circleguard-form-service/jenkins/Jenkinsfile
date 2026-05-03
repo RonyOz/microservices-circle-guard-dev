@@ -1,6 +1,6 @@
 def SERVICE_NAME = env.JOB_NAME.tokenize('/')[-2]          // e.g. "auth-service"
 def SERVICE_DIR  = "circleguard-${SERVICE_NAME}"            // e.g. "circleguard-auth-service" (Gradle project name)
-def REGISTRY     = 'registry.digitalocean.com/circleguard'
+def REGISTRY_REPO = 'registry.digitalocean.com/circleguard/circleguard-services'
 def IMAGE_TAG    = ''
 def IMAGE_FULL   = ''
 
@@ -18,7 +18,7 @@ pipeline {
             steps {
                 script {
                     IMAGE_TAG  = "sha-${env.GIT_COMMIT.take(7)}"
-                    IMAGE_FULL = "${REGISTRY}/${SERVICE_NAME}:${IMAGE_TAG}"
+                    IMAGE_FULL = "${REGISTRY_REPO}:${SERVICE_NAME}-${IMAGE_TAG}"
                 }
             }
         }
