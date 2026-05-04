@@ -1,45 +1,39 @@
 package com.circleguard.notification.service;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.test.context.ActiveProfiles;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 
-@SpringBootTest
-@ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 class ExposureNotificationListenerTest {
 
-    @Autowired
+    @InjectMocks
     private ExposureNotificationListener listener;
 
-    @MockBean
-    private KafkaTemplate<String, String> kafkaTemplate;
-
-    @MockBean
+    @Mock
     private NotificationDispatcher dispatcher;
 
-    @MockBean
-    private org.springframework.mail.javamail.JavaMailSender mailSender;
+    @Test
+    void shouldDispatchNotificationForKnownUserId() {
+        String mockEvent = "{\"userId\":\"user-123\",\"newStatus\":\"EXPOSED\"}";
 
-    @MockBean
-    private org.springframework.web.reactive.function.client.WebClient.Builder webClientBuilder;
+        listener.handleStatusChange(mockEvent);
 
-    @MockBean
-    private EmailService emailService;
-
-    @MockBean
-    private SmsService smsService;
-
-    @MockBean
-    private PushService pushService;
+        verify(dispatcher).dispatch(eq("user-123"), contains("health status has been updated"));
+    }
 
     @Test
-    void shouldHandleStatusChangeEventWithoutError() {
-        String mockEvent = "{\"userId\": \"user-123\", \"newStatus\": \"EXPOSED\"}";
-        assertDoesNotThrow(() -> listener.handleStatusChange(mockEvent));
+    void shouldFallbackToUnknownUserWhenPayloadHasNoUserId() {
+        String mockEvent = "{\"newStatus\":\"EXPOSED\"}";
+
+        listener.handleStatusChange(mockEvent);
+
+        verify(dispatcher).dispatch(eq("unknown-user"), contains("health status has been updated"));
     }
 }
