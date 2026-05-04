@@ -1,6 +1,9 @@
 spring:
   flyway:
     enabled: false
+  kafka:
+    listener:
+      auto-startup: false
   sql:
     init:
       mode: never
