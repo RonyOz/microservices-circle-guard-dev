@@ -1,0 +1,18 @@
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    listener:
+      auto-startup: false
+  mail:
+    host: mailhog
+    port: 1025
+
+push:
+  gotify:
+    url: http://localhost:8080
+    token: MOCK_TOKEN
+
+twilio:
+  account-sid: AC_MOCK_SID
+  auth-token: MOCK_TOKEN
+  from-number: "+15550000000"
