@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1.6
-FROM oven/bun:1.1-alpine AS deps
+FROM oven/bun:1.2-alpine AS deps
 WORKDIR /app
 COPY package.json bun.lock ./
 RUN --mount=type=cache,target=/root/.bun/install/cache \
     bun install --frozen-lockfile
 
-FROM oven/bun:1.1-alpine AS build
+FROM oven/bun:1.2-alpine AS build
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules

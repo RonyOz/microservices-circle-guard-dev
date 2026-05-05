@@ -30,7 +30,7 @@ pipeline {
                         -v "\${WORKSPACE}/${SERVICE_DIR}:/app" \\
                         -v bun-cache-shared:/root/.bun/install/cache \\
                         -w /app \\
-                        oven/bun:1.1-alpine \\
+                        oven/bun:1.2-alpine \\
                         sh -c "bun install --frozen-lockfile && bunx jest --ci --reporters=default --reporters=jest-junit"
                 """
             }
