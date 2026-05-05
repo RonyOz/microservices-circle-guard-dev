@@ -1,0 +1,131 @@
+def SERVICE_NAME  = 'mobile'
+def SERVICE_DIR   = 'mobile'
+def REGISTRY_REPO = 'registry.digitalocean.com/circleguard/circleguard-services'
+def IMAGE_TAG     = ''
+def IMAGE_FULL    = ''
+
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        timeout(time: 30, unit: 'MINUTES')
+        disableConcurrentBuilds()
+    }
+
+    stages {
+        stage('Prepare') {
+            steps {
+                script {
+                    IMAGE_TAG  = "sha-${env.GIT_COMMIT.take(7)}"
+                    IMAGE_FULL = "${REGISTRY_REPO}:${SERVICE_NAME}-${IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh """
+                    docker run --rm \\
+                        -v "\${WORKSPACE}/${SERVICE_DIR}:/app" \\
+                        -v bun-cache-shared:/root/.bun/install/cache \\
+                        -w /app \\
+                        oven/bun:1.1-alpine \\
+                        sh -c "bun install --frozen-lockfile && bunx jest --ci --reporters=default --reporters=jest-junit"
+                """
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true,
+                          testResults: "${SERVICE_DIR}/junit.xml"
+                }
+            }
+        }
+
+        stage('Build & Push') {
+            steps {
+                withCredentials([string(
+                    credentialsId: 'do-api-token',
+                    variable: 'DO_TOKEN'
+                )]) {
+                    sh """
+                        CACHE_IMAGE=${REGISTRY_REPO}:${SERVICE_NAME}-buildcache
+
+                        echo "\${DO_TOKEN}" | docker login registry.digitalocean.com \\
+                            -u "\${DO_TOKEN}" --password-stdin
+
+                        docker pull \$CACHE_IMAGE || true
+
+                        DOCKER_BUILDKIT=1 docker build \\
+                            -f ${SERVICE_DIR}/Dockerfile \\
+                            -t ${IMAGE_FULL} \\
+                            --build-arg BUILDKIT_INLINE_CACHE=1 \\
+                            --cache-from \$CACHE_IMAGE \\
+                            ${SERVICE_DIR}
+
+                        docker tag ${IMAGE_FULL} \$CACHE_IMAGE
+                        docker push ${IMAGE_FULL}
+                        docker push \$CACHE_IMAGE
+                    """
+                }
+            }
+        }
+
+        stage('Deploy: dev') {
+            when { branch 'dev' }
+            steps {
+                build job: 'circleguard-ops/circleguard-deploy-dev',
+                      parameters: [
+                          string(name: 'SERVICE',   value: SERVICE_NAME),
+                          string(name: 'IMAGE_TAG', value: IMAGE_TAG)
+                      ],
+                      wait: false
+            }
+        }
+
+        stage('Deploy: stage') {
+            when { branch pattern: 'release/.*', comparator: 'REGEXP' }
+            steps {
+                build job: 'circleguard-ops/circleguard-deploy-stage',
+                      parameters: [
+                          string(name: 'SERVICE',   value: SERVICE_NAME),
+                          string(name: 'IMAGE_TAG', value: IMAGE_TAG)
+                      ],
+                      wait: false
+            }
+        }
+
+        stage('Deploy: prod') {
+            when { branch 'main' }
+            steps {
+                script {
+                    def version = sh(
+                        script: "git describe --tags --match 'v*' --abbrev=0 2>/dev/null || echo '1.0.0'",
+                        returnStdout: true
+                    ).trim().replaceAll('^v', '')
+
+                    build job: 'circleguard-ops/circleguard-deploy-prod',
+                          parameters: [
+                              string(name: 'SERVICE',    value: SERVICE_NAME),
+                              string(name: 'IMAGE_TAG',  value: IMAGE_TAG),
+                              string(name: 'GIT_COMMIT', value: env.GIT_COMMIT),
+                              string(name: 'VERSION',    value: version)
+                          ],
+                          wait: false
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "PIPELINE FAILED — job: ${env.JOB_NAME}, branch: ${env.BRANCH_NAME}"
+        }
+        always {
+            script {
+                if (IMAGE_FULL) sh "docker rmi ${IMAGE_FULL} || true"
+            }
+            cleanWs()
+        }
+    }
+}

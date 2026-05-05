@@ -1,0 +1,10 @@
+node_modules
+.expo
+dist
+.git
+.github
+.vscode
+test-output.txt
+**/.DS_Store
+android
+ios
