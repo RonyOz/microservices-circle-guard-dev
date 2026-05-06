@@ -50,9 +50,11 @@ public class SecurityConfig {
     }
 
     @Bean
-    public LdapContextSource contextSource() {
+    public LdapContextSource contextSource(
+            @org.springframework.beans.factory.annotation.Value("${ldap.host:localhost}") String host,
+            @org.springframework.beans.factory.annotation.Value("${ldap.port:389}") String port) {
         LdapContextSource contextSource = new LdapContextSource();
-        contextSource.setUrl("ldap://localhost:389");
+        contextSource.setUrl("ldap://" + host + ":" + port);
         contextSource.setBase("dc=circleguard,dc=edu");
         contextSource.setUserDn("cn=admin,dc=circleguard,dc=edu");
         contextSource.setPassword("admin");
