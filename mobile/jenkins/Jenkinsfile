@@ -28,10 +28,10 @@ pipeline {
                 sh """
                     docker run --rm \\
                         -v "\${WORKSPACE}/${SERVICE_DIR}:/app" \\
-                        -v bun-cache-shared:/root/.bun/install/cache \\
+                        -v npm-cache-shared:/root/.npm \\
                         -w /app \\
-                        oven/bun:1.2-alpine \\
-                        sh -c "bun install --frozen-lockfile && bunx jest --ci --reporters=default --reporters=jest-junit"
+                        node:20-alpine \\
+                        sh -c "npm install --no-audit --no-fund --prefer-offline && npx --no-install jest --ci --reporters=default --reporters=jest-junit"
                 """
             }
             post {
