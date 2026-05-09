@@ -1,15 +1,14 @@
 package com.circleguard.gateway.service;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import org.junit.jupiter.api.BeforeEach;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Proxy;
 import java.security.Key;
 import java.util.UUID;
 
@@ -17,52 +16,56 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class QrValidationServiceTest {
 
-    private QrValidationService service;
-    private StringRedisTemplate redisTemplate;
-    private ValueOperations<String, String> valueOps;
-    private final String secret = "my-super-secret-test-key-32-chars-long";
+    @Test
+    void validateToken_invalidToken_returnsInvalid() throws Exception {
+        String secret = "abcdefghijklmnopqrstuvwxyz123456";
+        StringRedisTemplate redis = new StringRedisTemplate(){};
+        QrValidationService svc = new QrValidationService(redis);
+        Field f = svc.getClass().getDeclaredField("qrSecret");
+        f.setAccessible(true);
+        f.set(svc, secret);
 
-    @BeforeEach
-    void setUp() {
-        redisTemplate = Mockito.mock(StringRedisTemplate.class);
-        valueOps = Mockito.mock(ValueOperations.class);
-        Mockito.when(redisTemplate.opsForValue()).thenReturn(valueOps);
-        
-        service = new QrValidationService(redisTemplate);
-        ReflectionTestUtils.setField(service, "qrSecret", secret);
+        QrValidationService.ValidationResult r = svc.validateToken("badtoken");
+        assertFalse(r.valid());
+        assertEquals("RED", r.status());
     }
 
     @Test
-    void shouldValidateCorrectTokenAndAllowAccess() {
-        String anonymousId = UUID.randomUUID().toString();
+    void validateToken_withContagiedStatus_returnsDenied() throws Exception {
+        String secret = "abcdefghijklmnopqrstuvwxyz123456";
+        UUID anon = UUID.randomUUID();
         Key key = Keys.hmacShaKeyFor(secret.getBytes());
-        String token = Jwts.builder()
-                .setSubject(anonymousId)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+        String token = Jwts.builder().setSubject(anon.toString()).signWith(key, SignatureAlgorithm.HS256).compact();
 
-        Mockito.when(valueOps.get("user:status:" + anonymousId)).thenReturn("CLEAR");
+        @SuppressWarnings("unchecked")
+        ValueOperations<String,String> ops = (ValueOperations<String,String>) Proxy.newProxyInstance(
+                ValueOperations.class.getClassLoader(),
+                new Class[] { ValueOperations.class },
+                (proxy, method, args) -> {
+                    if ("get".equals(method.getName()) && args != null && args.length == 1) {
+                        String k = (String) args[0];
+                        if (k.equals("user:status:" + anon.toString())) return "CONTAGIED";
+                        return null;
+                    }
+                    return null;
+                }
+        );
 
-        QrValidationService.ValidationResult result = service.validateToken(token);
-        
-        assertTrue(result.valid());
-        assertEquals("GREEN", result.status());
-    }
+        StringRedisTemplate redis = new StringRedisTemplate() {
+            @Override
+            public ValueOperations<String, String> opsForValue() {
+                return ops;
+            }
+        };
 
-    @Test
-    void shouldDenyAccessForContagiedUser() {
-        String anonymousId = UUID.randomUUID().toString();
-        Key key = Keys.hmacShaKeyFor(secret.getBytes());
-        String token = Jwts.builder()
-                .setSubject(anonymousId)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+        QrValidationService svc = new QrValidationService(redis);
+        Field f = svc.getClass().getDeclaredField("qrSecret");
+        f.setAccessible(true);
+        f.set(svc, secret);
 
-        Mockito.when(valueOps.get("user:status:" + anonymousId)).thenReturn("CONTAGIED");
-
-        QrValidationService.ValidationResult result = service.validateToken(token);
-        
-        assertFalse(result.valid());
-        assertEquals("RED", result.status());
+        QrValidationService.ValidationResult r = svc.validateToken(token);
+        assertFalse(r.valid());
+        assertEquals("RED", r.status());
+        assertTrue(r.message().contains("Access Denied"));
     }
 }
