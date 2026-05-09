@@ -38,6 +38,15 @@ pipeline {
                 always {
                     junit allowEmptyResults: true,
                           testResults: "${SERVICE_DIR}/junit.xml"
+                    archiveArtifacts artifacts: "${SERVICE_DIR}/coverage/**", allowEmptyArchive: true
+                    publishHTML(target: [
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: "${SERVICE_DIR}/coverage/lcov-report",
+                        reportFiles: "index.html",
+                        reportName: "Coverage Report - ${SERVICE_NAME}"
+                    ])
                 }
             }
         }

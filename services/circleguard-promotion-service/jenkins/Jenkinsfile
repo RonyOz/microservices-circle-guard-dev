@@ -39,6 +39,15 @@ pipeline {
                 always {
                     junit allowEmptyResults: true,
                           testResults: "services/${SERVICE_DIR}/build/test-results/**/*.xml"
+                    archiveArtifacts artifacts: "services/${SERVICE_DIR}/build/reports/tests/test/**", allowEmptyArchive: true
+                    publishHTML(target: [
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: "services/${SERVICE_DIR}/build/reports/tests/test",
+                        reportFiles: "index.html",
+                        reportName: "Unit Test Report - ${SERVICE_DIR}"
+                    ])
                 }
             }
         }
