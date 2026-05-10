@@ -20,14 +20,20 @@ public class HealthSurveyService {
     public HealthSurvey submitSurvey(HealthSurvey survey) {
         HealthSurvey saved = repository.save(survey);
         
-        // Emit Event for Promotion Service
-        Map<String, Object> event = Map.of(
+        // Build and emit Event for Promotion Service
+        Map<String, Object> event = buildSurveyEvent(saved);
+        kafkaTemplate.send(TOPIC_SURVEY_SUBMITTED, saved.getAnonymousId().toString(), event);
+        
+        return saved;
+    }
+
+    // Package-private for unit testing
+    Map<String, Object> buildSurveyEvent(HealthSurvey saved) {
+        return Map.of(
             "anonymousId", saved.getAnonymousId(),
             "hasSymptoms", (saved.getHasFever() || saved.getHasCough()),
             "timestamp", System.currentTimeMillis()
         );
-        kafkaTemplate.send(TOPIC_SURVEY_SUBMITTED, saved.getAnonymousId().toString(), event);
-        
-        return saved;
+    }
     }
 }
