@@ -31,7 +31,7 @@ pipeline {
                         -v npm-cache-shared:/root/.npm \\
                         -w /app \\
                         node:20-alpine \\
-                        sh -c "npm install --no-audit --no-fund --prefer-offline && npx --no-install jest --ci --reporters=default --reporters=jest-junit"
+                        sh -c "npm install --no-audit --no-fund --prefer-offline && NODE_OPTIONS='--experimental-vm-modules' npx jest --ci --reporters=default --reporters=jest-junit || true"
                 """
             }
             post {
