@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="11" failures="6" errors="0" time="17.631">
+  <testsuite name="ProximityScanner" errors="0" failures="2" skipped="0" timestamp="2026-05-10T06:59:44" time="9.849" tests="2">
+    <testcase classname="ProximityScanner resolves with an array of peers after scan" name="ProximityScanner resolves with an array of peers after scan" time="0.006">
+      <failure>TypeError: A dynamic import callback was invoked without --experimental-vm-modules
+    at importModuleDynamicallyCallback (node:internal/modules/esm/utils:271:11)
+    at Object.&lt;anonymous&gt; (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/__tests__/proximityScanner.test.ts:3:5)
+    at Generator.next (&lt;anonymous&gt;)
+    at asyncGeneratorStep (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+    at _next (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+    at /home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:22:7
+    at new Promise (&lt;anonymous&gt;)
+    at Object.&lt;anonymous&gt; (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:14:12)
+    at Promise.then.completed (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:121:9)
+    at run (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
+    </testcase>
+    <testcase classname="ProximityScanner each peer has anonymousId, rssi, and timestamp fields" name="ProximityScanner each peer has anonymousId, rssi, and timestamp fields" time="0.001">
+      <failure>TypeError: A dynamic import callback was invoked without --experimental-vm-modules
+    at importModuleDynamicallyCallback (node:internal/modules/esm/utils:271:11)
+    at Object.&lt;anonymous&gt; (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/__tests__/proximityScanner.test.ts:10:5)
+    at Generator.next (&lt;anonymous&gt;)
+    at asyncGeneratorStep (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+    at _next (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+    at /home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:22:7
+    at new Promise (&lt;anonymous&gt;)
+    at Object.&lt;anonymous&gt; (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:14:12)
+    at Promise.then.completed (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:121:9)
+    at run (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-05-10T06:59:44" time="9.81" tests="1">
+    <testcase classname=" sanity check" name=" sanity check" time="0.008">
+    </testcase>
+  </testsuite>
+  <testsuite name="storage web fallback" errors="0" failures="4" skipped="0" timestamp="2026-05-10T06:59:44" time="10.077" tests="4">
+    <testcase classname="storage web fallback uses localStorage.getItem on web" name="storage web fallback uses localStorage.getItem on web" time="0.082">
+      <failure>TypeError: A dynamic import callback was invoked without --experimental-vm-modules
+    at importModuleDynamicallyCallback (node:internal/modules/esm/utils:271:11)
+    at Object.&lt;anonymous&gt; (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/__tests__/storage.test.ts:23:5)
+    at Generator.next (&lt;anonymous&gt;)
+    at asyncGeneratorStep (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+    at _next (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+    at /home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:22:7
+    at new Promise (&lt;anonymous&gt;)
+    at Object.&lt;anonymous&gt; (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:14:12)
+    at Promise.then.completed (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:121:9)
+    at run (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
+    </testcase>
+    <testcase classname="storage web fallback uses localStorage.setItem on web" name="storage web fallback uses localStorage.setItem on web" time="0">
+      <failure>TypeError: A dynamic import callback was invoked without --experimental-vm-modules
+    at importModuleDynamicallyCallback (node:internal/modules/esm/utils:271:11)
+    at Object.&lt;anonymous&gt; (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/__tests__/storage.test.ts:37:5)
+    at Generator.next (&lt;anonymous&gt;)
+    at asyncGeneratorStep (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+    at _next (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+    at /home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:22:7
+    at new Promise (&lt;anonymous&gt;)
+    at Object.&lt;anonymous&gt; (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:14:12)
+    at Promise.then.completed (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:121:9)
+    at run (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
+    </testcase>
+    <testcase classname="storage web fallback uses localStorage.removeItem on web" name="storage web fallback uses localStorage.removeItem on web" time="0.001">
+      <failure>TypeError: A dynamic import callback was invoked without --experimental-vm-modules
+    at importModuleDynamicallyCallback (node:internal/modules/esm/utils:271:11)
+    at Object.&lt;anonymous&gt; (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/__tests__/storage.test.ts:50:5)
+    at Generator.next (&lt;anonymous&gt;)
+    at asyncGeneratorStep (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+    at _next (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+    at /home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:22:7
+    at new Promise (&lt;anonymous&gt;)
+    at Object.&lt;anonymous&gt; (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:14:12)
+    at Promise.then.completed (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:121:9)
+    at run (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
+    </testcase>
+    <testcase classname="storage native fallback returns null when SecureStore returns null" name="storage native fallback returns null when SecureStore returns null" time="0.001">
+      <failure>TypeError: A dynamic import callback was invoked without --experimental-vm-modules
+    at importModuleDynamicallyCallback (node:internal/modules/esm/utils:271:11)
+    at Object.&lt;anonymous&gt; (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/__tests__/storage.test.ts:65:5)
+    at Generator.next (&lt;anonymous&gt;)
+    at asyncGeneratorStep (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+    at _next (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+    at /home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:22:7
+    at new Promise (&lt;anonymous&gt;)
+    at Object.&lt;anonymous&gt; (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/@babel/runtime/helpers/asyncToGenerator.js:14:12)
+    at Promise.then.completed (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:121:9)
+    at run (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/home/ronyoz/devops/microservices-circle-guard-dev/mobile/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="useQrToken" errors="0" failures="0" skipped="0" timestamp="2026-05-10T06:59:44" time="10.973" tests="4">
+    <testcase classname="useQrToken should initialize with a token and 60s timer when anonymousId is present" name="useQrToken should initialize with a token and 60s timer when anonymousId is present" time="0.02">
+    </testcase>
+    <testcase classname="useQrToken should not initialize if anonymousId is null" name="useQrToken should not initialize if anonymousId is null" time="0.003">
+    </testcase>
+    <testcase classname="useQrToken should decrement timer every second" name="useQrToken should decrement timer every second" time="0.004">
+    </testcase>
+    <testcase classname="useQrToken should rotate token and reset timer when it reaches 0" name="useQrToken should rotate token and reset timer when it reaches 0" time="0.002">
+    </testcase>
+  </testsuite>
+</testsuites>
