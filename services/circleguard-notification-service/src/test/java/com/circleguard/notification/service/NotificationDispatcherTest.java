@@ -8,6 +8,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.concurrent.CompletableFuture;
 
+import java.util.concurrent.CompletableFuture;
+
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -37,5 +39,18 @@ class NotificationDispatcherTest {
         verify(emailService).sendAsync(eq("user-123"), anyString());
         verify(smsService).sendAsync(eq("user-123"), anyString());
         verify(pushService).sendAsync(eq("user-123"), anyString());
+    }
+
+    @Test
+    void shouldStillCallAllChannels_whenOneFails() {
+        when(emailService.sendAsync(anyString(), anyString())).thenReturn(CompletableFuture.completedFuture(null));
+        when(smsService.sendAsync(anyString(), anyString())).thenReturn(CompletableFuture.failedFuture(new RuntimeException("SMS down")));
+        when(pushService.sendAsync(anyString(), anyString())).thenReturn(CompletableFuture.completedFuture(null));
+
+        dispatcher.dispatch("user-456", "health alert");
+
+        verify(emailService).sendAsync(eq("user-456"), anyString());
+        verify(smsService).sendAsync(eq("user-456"), anyString());
+        verify(pushService).sendAsync(eq("user-456"), anyString());
     }
 }

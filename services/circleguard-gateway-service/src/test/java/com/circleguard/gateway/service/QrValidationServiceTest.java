@@ -68,4 +68,82 @@ public class QrValidationServiceTest {
         assertEquals("RED", r.status());
         assertTrue(r.message().contains("Access Denied"));
     }
+
+    @Test
+    void validateToken_withPotentialStatus_returnsDenied() throws Exception {
+        String secret = "abcdefghijklmnopqrstuvwxyz123456";
+        UUID anon = UUID.randomUUID();
+        Key key = Keys.hmacShaKeyFor(secret.getBytes());
+        String token = Jwts.builder().setSubject(anon.toString()).signWith(key, SignatureAlgorithm.HS256).compact();
+
+        @SuppressWarnings("unchecked")
+        ValueOperations<String,String> ops = (ValueOperations<String,String>) Proxy.newProxyInstance(
+                ValueOperations.class.getClassLoader(),
+                new Class[] { ValueOperations.class },
+                (proxy, method, args) -> {
+                    if ("get".equals(method.getName()) && args != null && args.length == 1) {
+                        String k = (String) args[0];
+                        if (k.equals("user:status:" + anon.toString())) return "POTENTIAL";
+                        return null;
+                    }
+                    return null;
+                }
+        );
+
+        StringRedisTemplate redis = new StringRedisTemplate() {
+            @Override
+            public ValueOperations<String, String> opsForValue() {
+                return ops;
+            }
+        };
+
+        QrValidationService svc = new QrValidationService(redis);
+        Field f = svc.getClass().getDeclaredField("qrSecret");
+        f.setAccessible(true);
+        f.set(svc, secret);
+
+        QrValidationService.ValidationResult r = svc.validateToken(token);
+        assertFalse(r.valid());
+        assertEquals("RED", r.status());
+        assertTrue(r.message().contains("Access Denied"));
+    }
+
+    @Test
+    void validateToken_withGreenStatus_returnsValid() throws Exception {
+        String secret = "abcdefghijklmnopqrstuvwxyz123456";
+        UUID anon = UUID.randomUUID();
+        Key key = Keys.hmacShaKeyFor(secret.getBytes());
+        String token = Jwts.builder().setSubject(anon.toString()).signWith(key, SignatureAlgorithm.HS256).compact();
+
+        @SuppressWarnings("unchecked")
+        ValueOperations<String,String> ops = (ValueOperations<String,String>) Proxy.newProxyInstance(
+                ValueOperations.class.getClassLoader(),
+                new Class[] { ValueOperations.class },
+                (proxy, method, args) -> {
+                    if ("get".equals(method.getName()) && args != null && args.length == 1) {
+                        String k = (String) args[0];
+                        if (k.equals("user:status:" + anon.toString())) return "GREEN";
+                        return null;
+                    }
+                    return null;
+                }
+        );
+
+        StringRedisTemplate redis = new StringRedisTemplate() {
+            @Override
+            public ValueOperations<String, String> opsForValue() {
+                return ops;
+            }
+        };
+
+        QrValidationService svc = new QrValidationService(redis);
+        Field f = svc.getClass().getDeclaredField("qrSecret");
+        f.setAccessible(true);
+        f.set(svc, secret);
+
+        QrValidationService.ValidationResult r = svc.validateToken(token);
+        assertTrue(r.valid());
+        assertEquals("GREEN", r.status());
+        assertEquals("Welcome to Campus", r.message());
+    }
 }
