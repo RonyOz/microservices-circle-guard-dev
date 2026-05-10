@@ -25,14 +25,15 @@ pipeline {
 
         stage('Test') {
             steps {
-                sh """
-                    docker run --rm \\
-                        -v "\${WORKSPACE}/${SERVICE_DIR}:/app" \\
-                        -v npm-cache-shared:/root/.npm \\
-                        -w /app \\
-                        node:20-alpine \\
-                        sh -c "mkdir -p /app/node_modules/.bin && npm install --no-audit --no-fund --prefer-offline && NODE_OPTIONS='--experimental-vm-modules' npx jest --ci --reporters=default --reporters=jest-junit || true"
-                """
+                    sh """
+                        docker run --rm \\
+                            -v "\${WORKSPACE}/${SERVICE_DIR}:/app" \\
+                            -v npm-cache-shared:/root/.npm \\
+                            -v npm-modules-shared:/app/node_modules \\
+                            -w /app \\
+                            node:20-alpine \\
+                            sh -c "npm install --no-audit --no-fund --prefer-offline && NODE_OPTIONS='--experimental-vm-modules' npx jest --ci --reporters=default --reporters=jest-junit || true"
+                    """
             }
             post {
                 always {
