@@ -101,7 +101,7 @@ pipeline {
                           string(name: 'SERVICE',   value: SERVICE_NAME),
                           string(name: 'IMAGE_TAG', value: IMAGE_TAG)
                       ],
-                      wait: true
+                      wait: false
             }
         }
 
@@ -121,7 +121,7 @@ pipeline {
                               string(name: 'GIT_COMMIT', value: env.GIT_COMMIT),
                               string(name: 'VERSION',    value: version)
                           ],
-                          wait: true
+                          wait: false
                 }
             }
         }
