@@ -35,5 +35,4 @@ public class HealthSurveyService {
             "timestamp", System.currentTimeMillis()
         );
     }
-    }
 }

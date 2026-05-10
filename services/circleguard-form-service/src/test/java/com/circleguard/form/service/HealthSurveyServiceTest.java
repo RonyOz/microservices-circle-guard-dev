@@ -14,6 +14,8 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.mockito.Mockito.mock;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class HealthSurveyServiceTest {
@@ -25,7 +27,7 @@ public class HealthSurveyServiceTest {
 
         @SuppressWarnings("unchecked")
         public CapturingKafkaTemplate() {
-            super((ProducerFactory<String, Object>) null);
+            super((ProducerFactory<String, Object>) mock(ProducerFactory.class));
         }
 
         @Override
