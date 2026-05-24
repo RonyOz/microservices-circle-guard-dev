@@ -1,0 +1,18 @@
+name: CI — form-service
+
+on:
+  push:
+    branches: [main, dev, release/**]
+    paths: [services/circleguard-form-service/**]
+  pull_request:
+    paths: [services/circleguard-form-service/**]
+
+jobs:
+  ci:
+    uses: ./.github/workflows/_reusable-service-ci.yml
+    with:
+      service: form-service
+      build_system: gradle
+      context: .
+      dockerfile: services/circleguard-form-service/Dockerfile
+    secrets: inherit

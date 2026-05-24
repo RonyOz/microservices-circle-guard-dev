@@ -1,0 +1,18 @@
+name: CI — identity-service
+
+on:
+  push:
+    branches: [main, dev, release/**]
+    paths: [services/circleguard-identity-service/**]
+  pull_request:
+    paths: [services/circleguard-identity-service/**]
+
+jobs:
+  ci:
+    uses: ./.github/workflows/_reusable-service-ci.yml
+    with:
+      service: identity-service
+      build_system: gradle
+      context: .
+      dockerfile: services/circleguard-identity-service/Dockerfile
+    secrets: inherit

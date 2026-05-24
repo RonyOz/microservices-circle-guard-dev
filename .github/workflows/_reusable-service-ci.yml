@@ -1,0 +1,97 @@
+name: Reusable Service CI
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      build_system:
+        required: true
+        type: string
+        description: "gradle" or "npm"
+      context:
+        required: false
+        type: string
+        default: "."
+      dockerfile:
+        required: false
+        type: string
+        default: "Dockerfile"
+
+env:
+  AWS_REGION: us-east-1
+  REPOSITORY: circleguard
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure AWS credentials via OIDC
+        id: aws-auth
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set image tag
+        id: vars
+        run: echo "sha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Detect version (main only)
+        id: version
+        if: ${{ github.ref_name == 'main' }}
+        run: |
+          TAG=$(git describe --tags --match 'v*' --abbrev=0 2>/dev/null || echo '1.0.0')
+          echo "version=${TAG#v}" >> $GITHUB_OUTPUT
+
+      - name: Test (Gradle)
+        if: ${{ inputs.build_system == 'gradle' }}
+        run: |
+          ./gradlew :services:circleguard-${{ inputs.service }}:test --no-daemon --parallel
+
+      - name: Test (npm)
+        if: ${{ inputs.build_system == 'npm' }}
+        run: |
+          npm ci
+          npm test
+        working-directory: ${{ inputs.context }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.dockerfile }}
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.REPOSITORY }}:${{ inputs.service }}-sha-${{ steps.vars.outputs.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.REPOSITORY }}:${{ inputs.service }}-buildcache
+          cache-from: type=registry,ref=${{ steps.login-ecr.outputs.registry }}/${{ env.REPOSITORY }}:${{ inputs.service }}-buildcache
+          cache-to: type=inline
+
+      - name: Trigger ops deployment
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.OPS_REPO_TOKEN || secrets.GITHUB_TOKEN }}
+          repository: RonyOz/microservices-circle-guard-ops
+          event-type: ${{ github.ref_name == 'main' && 'deploy-prod' || startsWith(github.ref_name, 'release/') && 'deploy-stage' || 'deploy-dev' }}
+          client-payload: |
+            {
+              "service": "${{ inputs.service }}",
+              "image_tag": "sha-${{ steps.vars.outputs.sha }}",
+              "git_commit": "${{ github.sha }}",
+              "version": "${{ steps.version.outputs.version }}",
+              "registry_url": "${{ steps.login-ecr.outputs.registry }}"
+            }
