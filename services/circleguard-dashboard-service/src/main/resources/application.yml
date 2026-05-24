@@ -15,3 +15,7 @@ spring:
 
 server:
   port: 8084
+
+circleguard:
+  promotion-service:
+    url: ${PROMOTION_SERVICE_URL:http://localhost:8083}
