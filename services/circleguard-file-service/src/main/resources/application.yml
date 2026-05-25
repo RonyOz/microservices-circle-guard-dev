@@ -10,4 +10,4 @@ spring:
 #     secret-key: minioadmin
 
 server:
-  port: 8085
+  port: 8088
