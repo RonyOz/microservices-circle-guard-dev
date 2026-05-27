@@ -9,7 +9,7 @@ on:
       build_system:
         required: true
         type: string
-        description: "gradle" or "npm"
+        description: '"gradle" or "npm"'
       context:
         required: false
         type: string
