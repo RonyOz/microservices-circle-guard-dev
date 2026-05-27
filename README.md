@@ -156,3 +156,4 @@ We maintain high system integrity via multi-level testing:
 - **FERPA Compliance**: Student identities are never stored in the contact graph.
 - **Right to be Forgotten**: Users can trigger complete data purging via the Identity Vault.
 - **Temporal Privacy**: All contact edges are automatically purged after 14 days.
+# smoke test Tue May 26 20:07:19 -05 2026
