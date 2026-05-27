@@ -7,6 +7,10 @@ on:
   pull_request:
     paths: [services/circleguard-gateway-service/**]
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   ci:
     uses: ./.github/workflows/_reusable-service-ci.yml
