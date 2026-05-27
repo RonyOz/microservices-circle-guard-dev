@@ -1,5 +1,6 @@
 package com.circleguard.promotion.service;
 
+import com.circleguard.promotion.AbstractIntegrationTest;
 import com.circleguard.promotion.model.jpa.SystemSettings;
 import com.circleguard.promotion.repository.jpa.SystemSettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +17,6 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,12 +28,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(properties = {
-    "spring.main.allow-bean-definition-overriding=true",
-    "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration,org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration"
-})
-@ActiveProfiles("test")
-class StatusLifecycleTest {
+@SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true")
+class StatusLifecycleTest extends AbstractIntegrationTest {
 
     @TestConfiguration
     static class TestConfig {
@@ -69,7 +65,6 @@ class StatusLifecycleTest {
 
     @BeforeEach
     void setup() {
-        // Seed settings: 14 day mandatory fence
         SystemSettings settings = SystemSettings.builder()
                 .unconfirmedFencingEnabled(true)
                 .autoThresholdSeconds(3600L)
@@ -82,44 +77,38 @@ class StatusLifecycleTest {
 
     @Test
     void automaticTransition_ReleasesExpiredUsers() {
-        // 1. Setup mock Neo4j response
         Neo4jClient.UnboundRunnableSpec runnableSpec = Mockito.mock(Neo4jClient.UnboundRunnableSpec.class, Mockito.RETURNS_DEEP_STUBS);
         when(neo4jClient.query(anyString())).thenReturn(runnableSpec);
-        
+
         Map<String, Object> resultMap = Map.of(
             "releasedIds", List.of("EXPIRED_USER")
         );
-        
+
         when(runnableSpec.bind(anyLong()).to(anyString())
                 .fetch().one())
             .thenReturn(Optional.of(resultMap));
 
-        // 2. Action: Run lifecycle processor
         lifecycleService.processAutomaticTransitions();
 
-        // 3. Verify: Redis and Kafka updated
         verify(valueOperations).multiSet(ArgumentMatchers.anyMap());
         verify(kafkaTemplate).send(ArgumentMatchers.eq("promotion.status.changed"), ArgumentMatchers.eq("EXPIRED_USER"), ArgumentMatchers.anyMap());
     }
 
     @Test
     void automaticTransition_HandlesEmptyResults() {
-        // 1. Setup mock Neo4j response with no released users
         Neo4jClient.UnboundRunnableSpec runnableSpec = Mockito.mock(Neo4jClient.UnboundRunnableSpec.class, Mockito.RETURNS_DEEP_STUBS);
         when(neo4jClient.query(anyString())).thenReturn(runnableSpec);
-        
+
         Map<String, Object> resultMap = Map.of(
             "releasedIds", Collections.emptyList()
         );
-        
+
         when(runnableSpec.bind(anyLong()).to(anyString())
                 .fetch().one())
             .thenReturn(Optional.of(resultMap));
 
-        // 2. Action: Run lifecycle processor
         lifecycleService.processAutomaticTransitions();
 
-        // 3. Verify: No interactions with Redis/Kafka
         verify(valueOperations, Mockito.never()).multiSet(ArgumentMatchers.anyMap());
     }
 }

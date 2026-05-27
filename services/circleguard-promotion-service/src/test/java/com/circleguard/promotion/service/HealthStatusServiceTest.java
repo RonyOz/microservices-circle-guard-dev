@@ -1,22 +1,22 @@
 package com.circleguard.promotion.service;
 
+import com.circleguard.promotion.AbstractIntegrationTest;
 import com.circleguard.promotion.repository.graph.UserNodeRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.neo4j.core.Neo4jClient;
-import org.mockito.Mock;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,13 +28,9 @@ import com.circleguard.promotion.model.jpa.SystemSettings;
 import com.circleguard.promotion.repository.jpa.SystemSettingsRepository;
 import java.util.Optional;
 
-@SpringBootTest(properties = {
-    "spring.main.allow-bean-definition-overriding=true",
-    "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration,org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration"
-})
-@ActiveProfiles("test")
+@SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true")
 @AutoConfigureMockMvc
-class HealthStatusServiceTest {
+class HealthStatusServiceTest extends AbstractIntegrationTest {
 
     @TestConfiguration
     static class TestConfig {
@@ -79,25 +75,22 @@ class HealthStatusServiceTest {
         String anonymousId = "user-abc-123";
         String status = "GREEN";
 
-        // Mock Neo4j using Deep Stubs for the fluent API
         Neo4jClient.UnboundRunnableSpec runnableSpec = Mockito.mock(Neo4jClient.UnboundRunnableSpec.class, Mockito.RETURNS_DEEP_STUBS);
         when(neo4jClient.query(anyString())).thenReturn(runnableSpec);
-        
+
         java.util.Map<String, Object> resultMap = new java.util.HashMap<>();
         resultMap.put("sourceId", anonymousId);
         resultMap.put("affectedContacts", java.util.Collections.emptyList());
-        
+
         when(runnableSpec.bind(anyString()).to(anyString())
                 .bind(anyString()).to(anyString())
                 .bind(ArgumentMatchers.anyLong()).to(anyString())
                 .fetch().one())
             .thenReturn(Optional.of(resultMap));
 
-        // Mock Redis
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         assertDoesNotThrow(() -> healthStatusService.updateStatus(anonymousId, status));
-        
 
         Mockito.verify(kafkaTemplate).send(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.any());
     }
@@ -105,18 +98,16 @@ class HealthStatusServiceTest {
     @Test
     void shouldThrowExceptionWhenUpdatingStatusToActiveWithinFenceWindow() {
         String anonymousId = "user-fenced";
-        
-        // Mock user in SUSPECT status updated 5 days ago
+
         long fiveDaysAgo = System.currentTimeMillis() - (5L * 24 * 60 * 60 * 1000);
         UserNode user = UserNode.builder()
                 .anonymousId(anonymousId)
                 .status("SUSPECT")
                 .statusUpdatedAt(fiveDaysAgo)
                 .build();
-        
+
         when(userNodeRepository.findById(anonymousId)).thenReturn(Optional.of(user));
-        
-        // Mock settings with 14 day mandatory fence
+
         SystemSettings settings = SystemSettings.builder()
                 .mandatoryFenceDays(14)
                 .build();
@@ -128,26 +119,24 @@ class HealthStatusServiceTest {
     @Test
     void shouldAllowOverrideWhenWithinFenceWindow() {
         String anonymousId = "user-fenced-override";
-        
+
         long fiveDaysAgo = System.currentTimeMillis() - (5L * 24 * 60 * 60 * 1000);
         UserNode user = UserNode.builder()
                 .anonymousId(anonymousId)
                 .status("SUSPECT")
                 .statusUpdatedAt(fiveDaysAgo)
                 .build();
-        
+
         when(userNodeRepository.findById(anonymousId)).thenReturn(Optional.of(user));
-        
+
         SystemSettings settings = SystemSettings.builder()
                 .mandatoryFenceDays(14)
                 .build();
         when(systemSettingsRepository.getSettings()).thenReturn(Optional.of(settings));
 
-        // Mock Neo4j
         Neo4jClient.UnboundRunnableSpec runnableSpec = Mockito.mock(Neo4jClient.UnboundRunnableSpec.class, Mockito.RETURNS_DEEP_STUBS);
         when(neo4jClient.query(anyString())).thenReturn(runnableSpec);
-        
-        // Mock Redis
+
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         assertDoesNotThrow(() -> healthStatusService.resolveStatus(anonymousId, true));
