@@ -1,4 +1,4 @@
-# 🛡️ CircleGuard Monorepo
+# CircleGuard Monorepo
 
 **Absolute Privacy. High-Speed Containment. Secure Campus.**
 
@@ -6,7 +6,7 @@ CircleGuard is a state-of-the-art university contact tracing and fencing system 
 
 ---
 
-## 🌟 Vision & Mission
+## Vision & Mission
 
 Our vision is a university campus where health containment speed outpaces lab confirmation timelines without compromising student privacy. CircleGuard leverages campus-native intelligence—class schedules and WiFi infrastructure—to deliver a human-validated, graph-based protection ecosystem.
 
@@ -17,7 +17,7 @@ Our vision is a university campus where health containment speed outpaces lab co
 
 ---
 
-## 📊 Success Metrics
+## Success Metrics
 
 | Metric | Target | Measurement |
 |:---|:---|:---|
@@ -29,7 +29,7 @@ Our vision is a university campus where health containment speed outpaces lab co
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 CircleGuard follows a **Microservice Architecture** built on a **Hybrid Data Model**.
 
@@ -50,21 +50,21 @@ CircleGuard follows a **Microservice Architecture** built on a **Hybrid Data Mod
 
 ---
 
-## 🛠️ Technical Stack
+## Technical Stack
 
 | Layer | Technology | Rationale |
 |:---|:---|:---|
-| **Backend** | Spring Boot 4 / Java 21 | Enterprise-grade maturity & low-latency Jakarta EE support. |
+| **Backend** | Spring Boot 3.2.4 / Java 21 | Enterprise-grade maturity & low-latency Jakarta EE support. |
 | **Graph DB** | Neo4j 5.26 | High-performance recursive traversals unreachable with SQL. |
 | **Relational DB**| PostgreSQL 16 | ACID compliant storage for identity and configuration. |
 | **Message Bus** | Apache Kafka 7.6 | Persistent, audit-trailed event log for status dispatches. |
 | **Caching** | Redis 7.2 | L2 distributed cache for rapid entry-gate status validation. |
 | **Mobile/Web** | Expo (React Native) | Unified codebase across iOS, Android, and Browser. |
-| **Infra** | Kubernetes | Orchestration for high availability and auto-scaling. |
+| **Infra** | Kubernetes (AWS EKS) | Orchestration for high availability and auto-scaling. |
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
 ### Phase 1: MVP — The Intelligence Core (Current)
 - [x] Status Promotion Machine (Suspect → Probable → Confirmed).
@@ -84,7 +84,7 @@ CircleGuard follows a **Microservice Architecture** built on a **Hybrid Data Mod
 
 ---
 
-## 💻 Local Development
+## Local Development
 
 ### 1. Infrastructure
 Ensure Docker is installed, then start the middleware stack:
@@ -109,7 +109,7 @@ Every service exposes an OpenAPI 3.0 interface. Once running, visit:
 
 ---
 
-## 📱 Frontend Development
+## Frontend Development
 
 The frontend is built using **Expo (React Native)**, supporting iOS, Android, and Web from a single codebase located in `/mobile`.
 
@@ -138,7 +138,7 @@ npm run test
 
 ---
 
-## 🧪 Testing
+## Testing
 
 We maintain high system integrity via multi-level testing:
 
@@ -151,9 +151,26 @@ We maintain high system integrity via multi-level testing:
 
 ---
 
-## 🔐 Privacy & Compliance
+## CI/CD & Operations
+
+This repository holds **application code only**. Infrastructure as Code, Helm charts,
+CI/CD pipelines, and quality gates live in the companion ops repo:
+[`microservices-circle-guard-ops`](../microservices-circle-guard-ops).
+
+| Stage | Trigger | Pipeline |
+|:---|:---|:---|
+| **Build & push** | push to any service path | Reusable GitHub Actions workflow → test → build → push to **AWS ECR** via OIDC |
+| **Deploy dev** | push to `dev` | `repository_dispatch` → ops `deploy-dev.yml` → namespace `dev` (smoke) |
+| **Deploy stage** | push to `release/*` | ops `deploy-stage.yml` → namespace `stage` (E2E + Locust) |
+| **Deploy prod** | push to `main` | ops `deploy-prod.yml` → namespace `production` (`--atomic` + git-cliff release) |
+
+Images: `<account>.dkr.ecr.<region>.amazonaws.com/circleguard:<service>-sha-<commit7>`.
+Environments are **Kubernetes namespaces** on one shared EKS cluster.
+
+---
+
+## Privacy & Compliance
 
 - **FERPA Compliance**: Student identities are never stored in the contact graph.
 - **Right to be Forgotten**: Users can trigger complete data purging via the Identity Vault.
 - **Temporal Privacy**: All contact edges are automatically purged after 14 days.
-# smoke test Tue May 26 20:07:19 -05 2026
