@@ -1,3 +1,5 @@
+package com.circleguard.promotion.controller;
+
 import com.circleguard.promotion.model.AccessPoint;
 import com.circleguard.promotion.model.Floor;
 import com.circleguard.promotion.service.AccessPointService;
