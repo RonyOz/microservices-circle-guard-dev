@@ -26,8 +26,9 @@ replay_pid*
 # gradle
 .gradle/
 
-# 
-
 *build/
+
+# eclipse/gradle build output (compiled resources, not source)
+bin/
 
 .vscode/
