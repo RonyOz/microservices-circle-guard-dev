@@ -6,6 +6,7 @@ on:
     paths: [services/circleguard-notification-service/**]
   pull_request:
     paths: [services/circleguard-notification-service/**]
+  workflow_dispatch:
 
 permissions:
   id-token: write

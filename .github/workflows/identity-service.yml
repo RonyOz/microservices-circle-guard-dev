@@ -6,6 +6,7 @@ on:
     paths: [services/circleguard-identity-service/**]
   pull_request:
     paths: [services/circleguard-identity-service/**]
+  workflow_dispatch:
 
 permissions:
   id-token: write

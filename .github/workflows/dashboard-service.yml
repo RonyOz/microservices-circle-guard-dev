@@ -6,6 +6,7 @@ on:
     paths: [services/circleguard-dashboard-service/**]
   pull_request:
     paths: [services/circleguard-dashboard-service/**]
+  workflow_dispatch:
 
 permissions:
   id-token: write

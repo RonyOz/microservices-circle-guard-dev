@@ -6,6 +6,7 @@ on:
     paths: [services/circleguard-promotion-service/**]
   pull_request:
     paths: [services/circleguard-promotion-service/**]
+  workflow_dispatch:
 
 permissions:
   id-token: write
