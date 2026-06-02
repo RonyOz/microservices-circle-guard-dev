@@ -2,6 +2,10 @@ jwt:
   secret: "my-super-secret-test-key-32-chars-long"
   expiration: 3600000
 
+qr:
+  secret: "my-qr-secret-test-key-for-integration"
+  expiration: 300000
+
 spring:
   main:
     allow-bean-definition-overriding: true
