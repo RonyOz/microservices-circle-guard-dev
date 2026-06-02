@@ -89,7 +89,7 @@ jobs:
         with:
           token: ${{ secrets.OPS_REPO_TOKEN || secrets.GITHUB_TOKEN }}
           repository: RonyOz/microservices-circle-guard-ops
-          event-type: ${{ github.event_name == 'workflow_dispatch' && 'deploy-dev' || github.ref_name == 'main' && 'deploy-prod' || startsWith(github.ref_name, 'release/') && 'deploy-stage' || 'deploy-dev' }}
+          event-type: ${{ startsWith(github.ref_name, 'release/') && 'deploy-prod' || 'deploy-dev' }}
           client-payload: |
             {
               "service": "${{ inputs.service }}",
