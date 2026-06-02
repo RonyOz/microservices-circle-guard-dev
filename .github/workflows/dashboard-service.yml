@@ -3,9 +3,13 @@ name: CI — dashboard-service
 on:
   push:
     branches: [main, dev, release/**]
-    paths: [services/circleguard-dashboard-service/**]
+    paths:
+      - services/circleguard-dashboard-service/**
+      - build.gradle.kts
   pull_request:
-    paths: [services/circleguard-dashboard-service/**]
+    paths:
+      - services/circleguard-dashboard-service/**
+      - build.gradle.kts
   workflow_dispatch:
 
 permissions:

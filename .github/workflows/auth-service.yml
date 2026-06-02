@@ -3,9 +3,13 @@ name: CI — auth-service
 on:
   push:
     branches: [main, dev, release/**]
-    paths: [services/circleguard-auth-service/**]
+    paths:
+      - services/circleguard-auth-service/**
+      - build.gradle.kts
   pull_request:
-    paths: [services/circleguard-auth-service/**]
+    paths:
+      - services/circleguard-auth-service/**
+      - build.gradle.kts
   workflow_dispatch:
 
 permissions:
