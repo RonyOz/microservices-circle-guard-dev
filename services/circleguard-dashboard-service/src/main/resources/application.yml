@@ -19,3 +19,22 @@ server:
 circleguard:
   promotion-service:
     url: ${PROMOTION_SERVICE_URL:http://localhost:8083}
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,info,metrics
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://jaeger:9411/api/v2/spans

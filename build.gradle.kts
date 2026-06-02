@@ -34,6 +34,11 @@ subprojects {
         "implementation"("org.jetbrains.kotlin:kotlin-reflect")
         "testImplementation"("org.springframework.boot:spring-boot-starter-test")
         "testRuntimeOnly"("com.h2database:h2")
+        // Observability: Prometheus metrics, distributed tracing, JSON logging
+        "runtimeOnly"("io.micrometer:micrometer-registry-prometheus")
+        "implementation"("io.micrometer:micrometer-tracing-bridge-brave")
+        "implementation"("io.zipkin.reporter2:zipkin-reporter-brave")
+        "implementation"("net.logstash.logback:logstash-logback-encoder:7.4")
     }
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

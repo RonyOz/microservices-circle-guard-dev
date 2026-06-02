@@ -2,7 +2,8 @@ package com.circleguard.promotion.service;
 
 import com.circleguard.promotion.exception.FenceException;
 import com.circleguard.promotion.repository.graph.UserNodeRepository;
-import lombok.RequiredArgsConstructor;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -14,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class HealthStatusService {
     private final UserNodeRepository userNodeRepository;
@@ -22,6 +22,21 @@ public class HealthStatusService {
     private final StringRedisTemplate redisTemplate;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final com.circleguard.promotion.repository.jpa.SystemSettingsRepository systemSettingsRepository;
+    private final Counter statusUpdateCounter;
+
+    public HealthStatusService(UserNodeRepository userNodeRepository, Neo4jClient neo4jClient,
+                               StringRedisTemplate redisTemplate, KafkaTemplate<String, Object> kafkaTemplate,
+                               com.circleguard.promotion.repository.jpa.SystemSettingsRepository systemSettingsRepository,
+                               MeterRegistry meterRegistry) {
+        this.userNodeRepository = userNodeRepository;
+        this.neo4jClient = neo4jClient;
+        this.redisTemplate = redisTemplate;
+        this.kafkaTemplate = kafkaTemplate;
+        this.systemSettingsRepository = systemSettingsRepository;
+        this.statusUpdateCounter = Counter.builder("circleguard.promotion.status_updates")
+                .description("Total health status updates processed")
+                .register(meterRegistry);
+    }
 
     private static final String STATUS_KEY_PREFIX = "user:status:";
     private static final String TOPIC_STATUS_CHANGED = "promotion.status.changed";
@@ -37,6 +52,7 @@ public class HealthStatusService {
     @Transactional("neo4jTransactionManager")
     @CacheEvict(cacheNames = "userStatus", allEntries = true)
     public void updateStatus(String anonymousId, String status, boolean adminOverride) {
+        statusUpdateCounter.increment();
         log.info("Updating status: {} -> {} (Admin Override: {})", anonymousId, status, adminOverride);
 
         if ("ACTIVE".equals(status) && !adminOverride) {

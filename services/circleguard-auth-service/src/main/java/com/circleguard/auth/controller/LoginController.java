@@ -2,6 +2,8 @@ package com.circleguard.auth.controller;
 
 import com.circleguard.auth.service.JwtTokenService;
 import com.circleguard.auth.client.IdentityClient;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
@@ -11,12 +13,28 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@RequiredArgsConstructor
 public class LoginController {
 
     private final AuthenticationManager authManager;
     private final JwtTokenService jwtService;
     private final IdentityClient identityClient;
+    private final Counter loginSuccessCounter;
+    private final Counter loginFailureCounter;
+
+    public LoginController(AuthenticationManager authManager, JwtTokenService jwtService,
+                           IdentityClient identityClient, MeterRegistry meterRegistry) {
+        this.authManager = authManager;
+        this.jwtService = jwtService;
+        this.identityClient = identityClient;
+        this.loginSuccessCounter = Counter.builder("circleguard.auth.login")
+                .tag("result", "success")
+                .description("Successful login attempts")
+                .register(meterRegistry);
+        this.loginFailureCounter = Counter.builder("circleguard.auth.login")
+                .tag("result", "failure")
+                .description("Failed login attempts")
+                .register(meterRegistry);
+    }
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> request) {
@@ -39,12 +57,14 @@ public class LoginController {
             // 3. Issue Token
             String token = jwtService.generateToken(anonymousId, auth);
 
+            loginSuccessCounter.increment();
             return ResponseEntity.ok(Map.of(
                     "token", token,
                     "type", "Bearer",
                     "anonymousId", anonymousId.toString()
             ));
         } catch (org.springframework.security.core.AuthenticationException e) {
+            loginFailureCounter.increment();
             System.err.println("Authentication failed for " + username + ": " + e.getMessage());
             return ResponseEntity.status(401).body(Map.of("message", "Invalid username or password"));
         } catch (Exception e) {
