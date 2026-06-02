@@ -77,14 +77,11 @@ jobs:
           fi
           SONAR_ARGS="-Dsonar.projectKey=circleguard-microservices"
           SONAR_ARGS="$SONAR_ARGS -Dsonar.projectName=CircleGuard-Microservices"
-          SONAR_ARGS="$SONAR_ARGS -Dsonar.sources=services/circleguard-${{ inputs.service }}/src/main"
-          SONAR_ARGS="$SONAR_ARGS -Dsonar.tests=services/circleguard-${{ inputs.service }}/src/test"
-          SONAR_ARGS="$SONAR_ARGS -Dsonar.coverage.jacoco.xmlReportPaths=services/circleguard-${{ inputs.service }}/build/reports/jacoco/test/jacocoTestReport.xml"
           SONAR_ARGS="$SONAR_ARGS -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=300"
           if [ -n "$SONAR_ORGANIZATION" ]; then
             SONAR_ARGS="$SONAR_ARGS -Dsonar.organization=$SONAR_ORGANIZATION"
           fi
-          ./gradlew sonarqube --no-daemon $SONAR_ARGS
+          ./gradlew sonar --no-daemon $SONAR_ARGS
         continue-on-error: true
 
       - name: Test (npm)
