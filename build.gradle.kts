@@ -1,7 +1,7 @@
 plugins {
     id("org.springframework.boot") version "3.2.4" apply false
     id("io.spring.dependency-management") version "1.1.4" apply false
-    id("org.sonarqube") version "5.1.0.4882"
+    id("org.sonarqube") version "5.1.0.4882" apply false
     kotlin("jvm") version "1.9.24" apply false
     kotlin("plugin.spring") version "1.9.24" apply false
     kotlin("plugin.jpa") version "1.9.24" apply false
@@ -21,6 +21,7 @@ subprojects {
     apply(plugin = "java")
     apply(plugin = "jacoco")
     apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "org.sonarqube")
     extensions.configure<JavaPluginExtension> {
         toolchain {
             languageVersion.set(JavaLanguageVersion.of(21))

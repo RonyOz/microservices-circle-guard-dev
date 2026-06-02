@@ -81,7 +81,7 @@ jobs:
           if [ -n "$SONAR_ORGANIZATION" ]; then
             SONAR_ARGS="$SONAR_ARGS -Dsonar.organization=$SONAR_ORGANIZATION"
           fi
-          ./gradlew sonar --no-daemon $SONAR_ARGS
+          ./gradlew :services:circleguard-${{ inputs.service }}:sonar --no-daemon $SONAR_ARGS
         continue-on-error: true
 
       - name: Test (npm)
