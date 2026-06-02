@@ -65,7 +65,8 @@ jobs:
                     --no-daemon --parallel
 
       - name: SonarQube analysis
-        if: ${{ inputs.build_system == 'gradle' && secrets.SONAR_TOKEN != '' }}
+        if: ${{ inputs.build_system == 'gradle' }}
+        continue-on-error: true
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
