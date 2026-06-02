@@ -1,6 +1,7 @@
 plugins {
     id("org.springframework.boot") version "3.2.4" apply false
     id("io.spring.dependency-management") version "1.1.4" apply false
+    id("org.sonarqube") version "5.1.0.4882"
     kotlin("jvm") version "1.9.24" apply false
     kotlin("plugin.spring") version "1.9.24" apply false
     kotlin("plugin.jpa") version "1.9.24" apply false
@@ -12,6 +13,19 @@ allprojects {
 
     repositories {
         mavenCentral()
+    }
+}
+
+sonarqube {
+    properties {
+        property("sonar.projectKey", System.getenv("SONAR_PROJECT_KEY") ?: "circleguard")
+        property("sonar.projectName", System.getenv("SONAR_PROJECT_NAME") ?: "CircleGuard")
+        property("sonar.host.url", System.getenv("SONAR_HOST_URL") ?: "http://localhost:9000")
+        property("sonar.token", System.getenv("SONAR_TOKEN") ?: "")
+        property("sonar.java.source", "21")
+        property("sonar.coverage.jacoco.xmlReportPaths", "**/build/reports/jacoco/test/jacocoTestReport.xml")
+        property("sonar.exclusions", "**/generated/**,**/build/**,**/*Application.kt")
+        property("sonar.coverage.exclusions", "**/*Application.kt,**/*Config.kt,**/*Configuration.kt")
     }
 }
 

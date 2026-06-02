@@ -60,7 +60,28 @@ jobs:
       - name: Test (Gradle)
         if: ${{ inputs.build_system == 'gradle' }}
         run: |
-          ./gradlew :services:circleguard-${{ inputs.service }}:test --no-daemon --parallel
+          ./gradlew :services:circleguard-${{ inputs.service }}:test \
+                    :services:circleguard-${{ inputs.service }}:jacocoTestReport \
+                    --no-daemon --parallel
+
+      - name: SonarQube analysis
+        if: ${{ inputs.build_system == 'gradle' }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          if [ -z "$SONAR_TOKEN" ] || [ -z "$SONAR_HOST_URL" ]; then
+            echo "::warning::SONAR_TOKEN or SONAR_HOST_URL not configured — skipping SonarQube"
+            exit 0
+          fi
+          ./gradlew :services:circleguard-${{ inputs.service }}:sonarqube \
+            --no-daemon \
+            -Dsonar.projectKey=circleguard-${{ inputs.service }} \
+            -Dsonar.projectName="CircleGuard ${{ inputs.service }}" \
+            -Dsonar.coverage.jacoco.xmlReportPaths=services/circleguard-${{ inputs.service }}/build/reports/jacoco/test/jacocoTestReport.xml \
+            -Dsonar.qualitygate.wait=true \
+            -Dsonar.qualitygate.timeout=300
+        continue-on-error: true
 
       - name: Test (npm)
         if: ${{ inputs.build_system == 'npm' }}
