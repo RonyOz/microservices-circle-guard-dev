@@ -20,3 +20,13 @@ spring:
       ddl-auto: create-drop
   flyway:
     enabled: false
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      identityService:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 5
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
