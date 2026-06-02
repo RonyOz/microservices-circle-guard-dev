@@ -2,6 +2,7 @@ package com.circleguard.dashboard.service;
 
 import com.circleguard.dashboard.client.PromotionClient;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import java.util.*;
@@ -13,13 +14,21 @@ public class AnalyticsService {
     private final PromotionClient promotionClient;
     private final KAnonymityFilter kAnonymityFilter;
 
+    /**
+     * Configuration pattern — Feature Toggle. Honours FEATURE_KANONYMITY_ENABLED
+     * (chart env → relaxed-bound to feature.kanonymity.enabled). Lets ops disable
+     * the k-anonymity masking per namespace (e.g. dev) without a redeploy of code.
+     */
+    @Value("${feature.kanonymity.enabled:true}")
+    private boolean kAnonymityEnabled;
+
     public Map<String, Object> getCampusSummary() {
         return promotionClient.getHealthStats();
     }
 
     public Map<String, Object> getDepartmentStats(String department) {
         Map<String, Object> raw = promotionClient.getHealthStatsByDepartment(department);
-        return kAnonymityFilter.apply(raw);
+        return kAnonymityEnabled ? kAnonymityFilter.apply(raw) : raw;
     }
 
     public List<Map<String, Object>> getEntryTrends(UUID locationId) {

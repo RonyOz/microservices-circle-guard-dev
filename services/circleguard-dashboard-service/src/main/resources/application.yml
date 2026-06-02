@@ -25,6 +25,10 @@ management:
     health:
       probes:
         enabled: true
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
   endpoints:
     web:
       exposure:
@@ -38,3 +42,16 @@ management:
   zipkin:
     tracing:
       endpoint: http://jaeger:9411/api/v2/spans
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      promotionService:
+        register-health-indicator: true
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true

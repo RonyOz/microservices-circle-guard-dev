@@ -39,6 +39,9 @@ subprojects {
         "implementation"("io.micrometer:micrometer-tracing-bridge-brave")
         "implementation"("io.zipkin.reporter2:zipkin-reporter-brave")
         "implementation"("net.logstash.logback:logstash-logback-encoder:7.4")
+        // Resilience: Circuit Breaker (Resilience4j) + AOP for @CircuitBreaker aspect
+        "implementation"("io.github.resilience4j:resilience4j-spring-boot3:2.2.0")
+        "implementation"("org.springframework.boot:spring-boot-starter-aop")
     }
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
