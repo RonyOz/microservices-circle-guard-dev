@@ -16,18 +16,6 @@ allprojects {
     }
 }
 
-sonarqube {
-    properties {
-        property("sonar.projectKey", System.getenv("SONAR_PROJECT_KEY") ?: "circleguard")
-        property("sonar.projectName", System.getenv("SONAR_PROJECT_NAME") ?: "CircleGuard")
-        property("sonar.host.url", System.getenv("SONAR_HOST_URL") ?: "http://localhost:9000")
-        property("sonar.token", System.getenv("SONAR_TOKEN") ?: "")
-        property("sonar.java.source", "21")
-        property("sonar.coverage.jacoco.xmlReportPaths", "**/build/reports/jacoco/test/jacocoTestReport.xml")
-        property("sonar.exclusions", "**/generated/**,**/build/**,**/*Application.kt")
-        property("sonar.coverage.exclusions", "**/*Application.kt,**/*Config.kt,**/*Configuration.kt")
-    }
-}
 
 subprojects {
     apply(plugin = "java")
