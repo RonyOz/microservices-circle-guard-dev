@@ -69,18 +69,20 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
         run: |
           if [ -z "$SONAR_TOKEN" ] || [ -z "$SONAR_HOST_URL" ]; then
             echo "::warning::SONAR_TOKEN or SONAR_HOST_URL not configured — skipping SonarQube"
             exit 0
           fi
-          ./gradlew :services:circleguard-${{ inputs.service }}:sonarqube \
-            --no-daemon \
-            -Dsonar.projectKey=circleguard-${{ inputs.service }} \
-            -Dsonar.projectName="CircleGuard ${{ inputs.service }}" \
-            -Dsonar.coverage.jacoco.xmlReportPaths=services/circleguard-${{ inputs.service }}/build/reports/jacoco/test/jacocoTestReport.xml \
-            -Dsonar.qualitygate.wait=true \
-            -Dsonar.qualitygate.timeout=300
+          SONAR_ARGS="-Dsonar.projectKey=circleguard-${{ inputs.service }}"
+          SONAR_ARGS="$SONAR_ARGS -Dsonar.projectName=CircleGuard-${{ inputs.service }}"
+          SONAR_ARGS="$SONAR_ARGS -Dsonar.coverage.jacoco.xmlReportPaths=services/circleguard-${{ inputs.service }}/build/reports/jacoco/test/jacocoTestReport.xml"
+          SONAR_ARGS="$SONAR_ARGS -Dsonar.qualitygate.wait=true -Dsonar.qualitygate.timeout=300"
+          if [ -n "$SONAR_ORGANIZATION" ]; then
+            SONAR_ARGS="$SONAR_ARGS -Dsonar.organization=$SONAR_ORGANIZATION"
+          fi
+          ./gradlew :services:circleguard-${{ inputs.service }}:sonarqube --no-daemon $SONAR_ARGS
         continue-on-error: true
 
       - name: Test (npm)
