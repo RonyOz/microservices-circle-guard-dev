@@ -4,6 +4,7 @@ import com.circleguard.form.model.HealthSurvey;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,7 @@ import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -68,6 +70,23 @@ class HealthSurveyKafkaIntegrationTest {
         consumer.close();
     }
 
+    /**
+     * Polls until a record matching the given key is found, or 5 seconds elapse.
+     * Multiple records in the same topic (from previous tests) are skipped by key.
+     */
+    private ConsumerRecord<String, String> pollForKey(String key) {
+        long deadline = System.currentTimeMillis() + 5_000;
+        while (System.currentTimeMillis() < deadline) {
+            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(200));
+            for (ConsumerRecord<String, String> r : records.records("survey.submitted")) {
+                if (key.equals(r.key())) {
+                    return r;
+                }
+            }
+        }
+        throw new IllegalStateException("No record found for key: " + key + " within 5 seconds");
+    }
+
     @Test
     void submitSurveyWithFever_publishesHasSymptomsTrue() {
         UUID anonymousId = UUID.randomUUID();
@@ -79,8 +98,7 @@ class HealthSurveyKafkaIntegrationTest {
 
         healthSurveyService.submitSurvey(survey);
 
-        ConsumerRecord<String, String> record =
-                KafkaTestUtils.getSingleRecord(consumer, "survey.submitted", 5_000);
+        ConsumerRecord<String, String> record = pollForKey(anonymousId.toString());
 
         assertThat(record.key()).isEqualTo(anonymousId.toString());
         assertThat(record.value()).contains("\"hasSymptoms\":true");
@@ -98,8 +116,7 @@ class HealthSurveyKafkaIntegrationTest {
 
         healthSurveyService.submitSurvey(survey);
 
-        ConsumerRecord<String, String> record =
-                KafkaTestUtils.getSingleRecord(consumer, "survey.submitted", 5_000);
+        ConsumerRecord<String, String> record = pollForKey(anonymousId.toString());
 
         assertThat(record.key()).isEqualTo(anonymousId.toString());
         assertThat(record.value()).contains("\"hasSymptoms\":true");
@@ -116,8 +133,7 @@ class HealthSurveyKafkaIntegrationTest {
 
         healthSurveyService.submitSurvey(survey);
 
-        ConsumerRecord<String, String> record =
-                KafkaTestUtils.getSingleRecord(consumer, "survey.submitted", 5_000);
+        ConsumerRecord<String, String> record = pollForKey(anonymousId.toString());
 
         assertThat(record.key()).isEqualTo(anonymousId.toString());
         assertThat(record.value()).contains("\"hasSymptoms\":false");
