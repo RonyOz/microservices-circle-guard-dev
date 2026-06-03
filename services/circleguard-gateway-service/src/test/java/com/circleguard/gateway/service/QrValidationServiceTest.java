@@ -3,6 +3,8 @@ package com.circleguard.gateway.service;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -16,53 +18,50 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class QrValidationServiceTest {
 
-    @Test
-    void validateToken_invalidToken_returnsInvalid() throws Exception {
-        String secret = "abcdefghijklmnopqrstuvwxyz123456";
-        StringRedisTemplate redis = new StringRedisTemplate(){};
-        QrValidationService svc = new QrValidationService(redis);
-        Field f = svc.getClass().getDeclaredField("qrSecret");
-        f.setAccessible(true);
-        f.set(svc, secret);
+    private static final String SECRET = "abcdefghijklmnopqrstuvwxyz123456";
+    private final MeterRegistry registry = new SimpleMeterRegistry();
 
+    private QrValidationService buildService(StringRedisTemplate redis) throws Exception {
+        QrValidationService svc = new QrValidationService(redis, registry);
+        Field f = QrValidationService.class.getDeclaredField("qrSecret");
+        f.setAccessible(true);
+        f.set(svc, SECRET);
+        return svc;
+    }
+
+    private StringRedisTemplate redisReturning(String anonymousId, String status) {
+        @SuppressWarnings("unchecked")
+        ValueOperations<String, String> ops = (ValueOperations<String, String>) Proxy.newProxyInstance(
+                ValueOperations.class.getClassLoader(),
+                new Class[]{ValueOperations.class},
+                (proxy, method, args) -> {
+                    if ("get".equals(method.getName()) && args != null && args.length == 1) {
+                        String k = (String) args[0];
+                        return k.equals("user:status:" + anonymousId) ? status : null;
+                    }
+                    return null;
+                });
+        return new StringRedisTemplate() {
+            @Override
+            public ValueOperations<String, String> opsForValue() { return ops; }
+        };
+    }
+
+    @Test
+    void invalidToken_returnsInvalid() throws Exception {
+        QrValidationService svc = buildService(new StringRedisTemplate() {});
         QrValidationService.ValidationResult r = svc.validateToken("badtoken");
         assertFalse(r.valid());
         assertEquals("RED", r.status());
     }
 
     @Test
-    void validateToken_withContagiedStatus_returnsDenied() throws Exception {
-        String secret = "abcdefghijklmnopqrstuvwxyz123456";
+    void contagiedStatus_returnsDenied() throws Exception {
         UUID anon = UUID.randomUUID();
-        Key key = Keys.hmacShaKeyFor(secret.getBytes());
+        Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
         String token = Jwts.builder().setSubject(anon.toString()).signWith(key, SignatureAlgorithm.HS256).compact();
 
-        @SuppressWarnings("unchecked")
-        ValueOperations<String,String> ops = (ValueOperations<String,String>) Proxy.newProxyInstance(
-                ValueOperations.class.getClassLoader(),
-                new Class[] { ValueOperations.class },
-                (proxy, method, args) -> {
-                    if ("get".equals(method.getName()) && args != null && args.length == 1) {
-                        String k = (String) args[0];
-                        if (k.equals("user:status:" + anon.toString())) return "CONTAGIED";
-                        return null;
-                    }
-                    return null;
-                }
-        );
-
-        StringRedisTemplate redis = new StringRedisTemplate() {
-            @Override
-            public ValueOperations<String, String> opsForValue() {
-                return ops;
-            }
-        };
-
-        QrValidationService svc = new QrValidationService(redis);
-        Field f = svc.getClass().getDeclaredField("qrSecret");
-        f.setAccessible(true);
-        f.set(svc, secret);
-
+        QrValidationService svc = buildService(redisReturning(anon.toString(), "CONTAGIED"));
         QrValidationService.ValidationResult r = svc.validateToken(token);
         assertFalse(r.valid());
         assertEquals("RED", r.status());
@@ -70,38 +69,12 @@ public class QrValidationServiceTest {
     }
 
     @Test
-    void validateToken_withPotentialStatus_returnsDenied() throws Exception {
-        String secret = "abcdefghijklmnopqrstuvwxyz123456";
+    void potentialStatus_returnsDenied() throws Exception {
         UUID anon = UUID.randomUUID();
-        Key key = Keys.hmacShaKeyFor(secret.getBytes());
+        Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
         String token = Jwts.builder().setSubject(anon.toString()).signWith(key, SignatureAlgorithm.HS256).compact();
 
-        @SuppressWarnings("unchecked")
-        ValueOperations<String,String> ops = (ValueOperations<String,String>) Proxy.newProxyInstance(
-                ValueOperations.class.getClassLoader(),
-                new Class[] { ValueOperations.class },
-                (proxy, method, args) -> {
-                    if ("get".equals(method.getName()) && args != null && args.length == 1) {
-                        String k = (String) args[0];
-                        if (k.equals("user:status:" + anon.toString())) return "POTENTIAL";
-                        return null;
-                    }
-                    return null;
-                }
-        );
-
-        StringRedisTemplate redis = new StringRedisTemplate() {
-            @Override
-            public ValueOperations<String, String> opsForValue() {
-                return ops;
-            }
-        };
-
-        QrValidationService svc = new QrValidationService(redis);
-        Field f = svc.getClass().getDeclaredField("qrSecret");
-        f.setAccessible(true);
-        f.set(svc, secret);
-
+        QrValidationService svc = buildService(redisReturning(anon.toString(), "POTENTIAL"));
         QrValidationService.ValidationResult r = svc.validateToken(token);
         assertFalse(r.valid());
         assertEquals("RED", r.status());
@@ -109,38 +82,12 @@ public class QrValidationServiceTest {
     }
 
     @Test
-    void validateToken_withGreenStatus_returnsValid() throws Exception {
-        String secret = "abcdefghijklmnopqrstuvwxyz123456";
+    void greenStatus_returnsValid() throws Exception {
         UUID anon = UUID.randomUUID();
-        Key key = Keys.hmacShaKeyFor(secret.getBytes());
+        Key key = Keys.hmacShaKeyFor(SECRET.getBytes());
         String token = Jwts.builder().setSubject(anon.toString()).signWith(key, SignatureAlgorithm.HS256).compact();
 
-        @SuppressWarnings("unchecked")
-        ValueOperations<String,String> ops = (ValueOperations<String,String>) Proxy.newProxyInstance(
-                ValueOperations.class.getClassLoader(),
-                new Class[] { ValueOperations.class },
-                (proxy, method, args) -> {
-                    if ("get".equals(method.getName()) && args != null && args.length == 1) {
-                        String k = (String) args[0];
-                        if (k.equals("user:status:" + anon.toString())) return "GREEN";
-                        return null;
-                    }
-                    return null;
-                }
-        );
-
-        StringRedisTemplate redis = new StringRedisTemplate() {
-            @Override
-            public ValueOperations<String, String> opsForValue() {
-                return ops;
-            }
-        };
-
-        QrValidationService svc = new QrValidationService(redis);
-        Field f = svc.getClass().getDeclaredField("qrSecret");
-        f.setAccessible(true);
-        f.set(svc, secret);
-
+        QrValidationService svc = buildService(redisReturning(anon.toString(), "GREEN"));
         QrValidationService.ValidationResult r = svc.validateToken(token);
         assertTrue(r.valid());
         assertEquals("GREEN", r.status());

@@ -12,7 +12,13 @@ jwt:
 
 qr:
   secret: "${QR_SECRET:my-qr-secret-key-for-dev-1234567890}"
-  expiration: 300
+  expiration: ${QR_EXPIRATION_SECONDS:300}
+
+# Rate Limiting — values injected via K8s ConfigMap (External Configuration Store pattern)
+rate:
+  limit:
+    requests-per-window: ${RATE_LIMIT_REQUESTS_PER_WINDOW:60}
+    window-seconds: ${RATE_LIMIT_WINDOW_SECONDS:60}
 
 server:
   port: 8083

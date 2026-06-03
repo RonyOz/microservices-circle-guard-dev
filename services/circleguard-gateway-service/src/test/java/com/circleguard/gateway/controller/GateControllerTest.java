@@ -1,6 +1,8 @@
 package com.circleguard.gateway.controller;
 
+import com.circleguard.gateway.interceptor.RateLimitInterceptor;
 import com.circleguard.gateway.service.QrValidationService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -20,6 +23,15 @@ public class GateControllerTest {
 
     @MockBean
     private QrValidationService validationService;
+
+    @MockBean
+    private RateLimitInterceptor rateLimitInterceptor;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        // Allow all requests through in controller tests — rate limiting tested separately
+        Mockito.when(rateLimitInterceptor.preHandle(any(), any(), any())).thenReturn(true);
+    }
 
     @Test
     void shouldReturnValidationResult() throws Exception {

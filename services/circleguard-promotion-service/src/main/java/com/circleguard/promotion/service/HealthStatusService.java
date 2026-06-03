@@ -2,7 +2,6 @@ package com.circleguard.promotion.service;
 
 import com.circleguard.promotion.exception.FenceException;
 import com.circleguard.promotion.repository.graph.UserNodeRepository;
-import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -22,7 +21,7 @@ public class HealthStatusService {
     private final StringRedisTemplate redisTemplate;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final com.circleguard.promotion.repository.jpa.SystemSettingsRepository systemSettingsRepository;
-    private final Counter statusUpdateCounter;
+    private final MeterRegistry meterRegistry;
 
     public HealthStatusService(UserNodeRepository userNodeRepository, Neo4jClient neo4jClient,
                                StringRedisTemplate redisTemplate, KafkaTemplate<String, Object> kafkaTemplate,
@@ -33,9 +32,7 @@ public class HealthStatusService {
         this.redisTemplate = redisTemplate;
         this.kafkaTemplate = kafkaTemplate;
         this.systemSettingsRepository = systemSettingsRepository;
-        this.statusUpdateCounter = Counter.builder("circleguard.promotion.status_updates")
-                .description("Total health status updates processed")
-                .register(meterRegistry);
+        this.meterRegistry = meterRegistry;
     }
 
     private static final String STATUS_KEY_PREFIX = "user:status:";
@@ -52,7 +49,7 @@ public class HealthStatusService {
     @Transactional("neo4jTransactionManager")
     @CacheEvict(cacheNames = "userStatus", allEntries = true)
     public void updateStatus(String anonymousId, String status, boolean adminOverride) {
-        statusUpdateCounter.increment();
+        meterRegistry.counter("circleguard.health.promotions", "to_status", status).increment();
         log.info("Updating status: {} -> {} (Admin Override: {})", anonymousId, status, adminOverride);
 
         if ("ACTIVE".equals(status) && !adminOverride) {
