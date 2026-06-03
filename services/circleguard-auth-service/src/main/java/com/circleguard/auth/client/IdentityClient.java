@@ -3,6 +3,7 @@ package com.circleguard.auth.client;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import java.util.*;
@@ -20,10 +21,14 @@ public class IdentityClient {
 
     private static final String CB = "identityService";
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
 
     @Value("${identity.service.url:http://localhost:8083}")
     private String identityBaseUrl;
+
+    public IdentityClient(RestTemplateBuilder builder) {
+        this.restTemplate = builder.build();
+    }
 
     @CircuitBreaker(name = CB, fallbackMethod = "getAnonymousIdFallback")
     public UUID getAnonymousId(String realIdentity) {

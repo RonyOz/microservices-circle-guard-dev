@@ -3,6 +3,7 @@ package com.circleguard.dashboard.client;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,10 +22,14 @@ public class PromotionClient {
 
     private static final String CB = "promotionService";
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
 
     @Value("${circleguard.promotion-service.url:http://localhost:8083}")
     private String promotionServiceUrl;
+
+    public PromotionClient(RestTemplateBuilder builder) {
+        this.restTemplate = builder.build();
+    }
 
     @SuppressWarnings("unchecked")
     @CircuitBreaker(name = CB, fallbackMethod = "healthStatsFallback")
