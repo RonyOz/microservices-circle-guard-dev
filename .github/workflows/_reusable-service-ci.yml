@@ -71,7 +71,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./gradlew :services:circleguard-${{ inputs.service }}:sonar \
+          ./gradlew sonar \
             -Dsonar.projectKey=circleguard-microservices \
             -Dsonar.projectName=CircleGuard-Microservices \
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \

@@ -5,7 +5,7 @@ services:
     image: postgres:16
     container_name: circleguard-postgres
     environment:
-      POSTGRES_USER: admin
+      POSTGRES_USER: circleguard
       POSTGRES_PASSWORD: password
       POSTGRES_DB: circleguard
     ports:
