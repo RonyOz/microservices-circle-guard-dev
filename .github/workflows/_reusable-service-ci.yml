@@ -71,11 +71,13 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./gradlew sonar -PsonarService=${{ inputs.service }} \
+          ./gradlew :services:circleguard-${{ inputs.service }}:classes sonar \
+            -PsonarService=${{ inputs.service }} \
             -Dsonar.projectKey=circleguard-${{ inputs.service }} \
             -Dsonar.projectName=circleguard-${{ inputs.service }} \
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
             -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.coverage.jacoco.xmlReportPaths=services/circleguard-${{ inputs.service }}/build/reports/jacoco/test/jacocoTestReport.xml \
             -Dsonar.qualitygate.wait=true \
             -Dsonar.qualitygate.timeout=300 \
             --no-daemon
