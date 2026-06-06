@@ -68,4 +68,18 @@ extensions.configure<JavaPluginExtension> {
             html.required.set(true)
         }
     }
+
+    // Per-service SonarCloud analysis: `-PsonarService=<svc>` scopes the root `sonar`
+    // task to that single module (every other module is skipped), so each service
+    // publishes to its own project key instead of one aggregate project.
+    afterEvaluate {
+        val svc = providers.gradleProperty("sonarService").orNull
+        if (svc != null) {
+            configure<org.sonarqube.gradle.SonarExtension> {
+                properties {
+                    property("sonar.skipProject", (project.name != "circleguard-$svc").toString())
+                }
+            }
+        }
+    }
 }
