@@ -64,23 +64,28 @@ jobs:
                     :services:circleguard-${{ inputs.service }}:jacocoTestReport \
                     --no-daemon --parallel
 
+      - name: Export dependency classpath for Sonar
+        if: ${{ inputs.build_system == 'gradle' }}
+        run: ./gradlew :services:circleguard-${{ inputs.service }}:sonarLibraries --no-daemon
+
       - name: SonarQube analysis (Java)
         if: ${{ inputs.build_system == 'gradle' }}
         continue-on-error: true
+        uses: sonarsource/sonarqube-scan-action@v3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ./gradlew :services:circleguard-${{ inputs.service }}:classes sonar \
-            -PsonarService=${{ inputs.service }} \
-            -Dsonar.projectKey=circleguard-${{ inputs.service }} \
-            -Dsonar.projectName=circleguard-${{ inputs.service }} \
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.coverage.jacoco.xmlReportPaths=services/circleguard-${{ inputs.service }}/build/reports/jacoco/test/jacocoTestReport.xml \
-            -Dsonar.qualitygate.wait=true \
-            -Dsonar.qualitygate.timeout=300 \
-            --rerun-tasks --no-daemon
+        with:
+          projectBaseDir: services/circleguard-${{ inputs.service }}
+          args: >
+            -Dsonar.projectKey=circleguard-${{ inputs.service }}
+            -Dsonar.projectName=circleguard-${{ inputs.service }}
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.sources=src/main/java
+            -Dsonar.java.binaries=build/classes/java/main
+            -Dsonar.java.libraries=build/sonar-libs/*.jar
+            -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml
+            -Dsonar.qualitygate.wait=true
 
       - name: Test (npm)
         if: ${{ inputs.build_system == 'npm' }}

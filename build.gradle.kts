@@ -4,7 +4,6 @@ plugins {
     kotlin("jvm") version "1.9.24" apply false
     kotlin("plugin.spring") version "1.9.24" apply false
     kotlin("plugin.jpa") version "1.9.24" apply false
-    id("org.sonarqube") version "5.1.0.4882"
 }
 
 allprojects {
@@ -69,17 +68,12 @@ extensions.configure<JavaPluginExtension> {
         }
     }
 
-    // Per-service SonarCloud analysis: `-PsonarService=<svc>` scopes the root `sonar`
-    // task to that single module (every other module is skipped), so each service
-    // publishes to its own project key instead of one aggregate project.
-    afterEvaluate {
-        val svc = providers.gradleProperty("sonarService").orNull
-        if (svc != null) {
-            configure<org.sonarqube.gradle.SonarExtension> {
-                properties {
-                    property("sonar.skipProject", (project.name != "circleguard-$svc").toString())
-                }
-            }
-        }
+    // Copy dependency jars into build/sonar-libs so the standalone SonarScanner CLI
+    // (runs in a container that only mounts the workspace) can read them as
+    // sonar.java.libraries for full Java type resolution.
+    tasks.register<Sync>("sonarLibraries") {
+        from(configurations.named("runtimeClasspath"))
+        into(layout.buildDirectory.dir("sonar-libs"))
+        include("*.jar")
     }
 }
