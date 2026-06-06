@@ -80,7 +80,7 @@ jobs:
             -Dsonar.coverage.jacoco.xmlReportPaths=services/circleguard-${{ inputs.service }}/build/reports/jacoco/test/jacocoTestReport.xml \
             -Dsonar.qualitygate.wait=true \
             -Dsonar.qualitygate.timeout=300 \
-            --no-daemon
+            --rerun-tasks --no-daemon
 
       - name: Test (npm)
         if: ${{ inputs.build_system == 'npm' }}
