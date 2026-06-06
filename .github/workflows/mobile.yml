@@ -6,6 +6,7 @@ on:
     paths: [mobile/**]
   pull_request:
     paths: [mobile/**]
+  workflow_dispatch:
 
 permissions:
   id-token: write
