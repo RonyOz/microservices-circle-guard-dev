@@ -9,9 +9,12 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import java.util.UUID;
 import org.springframework.kafka.core.KafkaTemplate;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.context.annotation.Import;
@@ -29,6 +32,32 @@ class IdentityVaultControllerTest {
 
     @MockBean
     private KafkaTemplate<String, Object> kafkaTemplate;
+
+    @Test
+    void mapIdentity_publicEndpoint_returnsAnonymousId() throws Exception {
+        UUID anon = UUID.randomUUID();
+        when(vaultService.getOrCreateAnonymousId("user@circleguard.edu")).thenReturn(anon);
+
+        mockMvc.perform(post("/api/v1/identities/map")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"realIdentity\":\"user@circleguard.edu\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.anonymousId").value(anon.toString()));
+    }
+
+    @Test
+    void registerVisitor_publicEndpoint_combinesDetailsIntoVaultIdentity() throws Exception {
+        UUID anon = UUID.randomUUID();
+        when(vaultService.getOrCreateAnonymousId(startsWith("VISITOR|"))).thenReturn(anon);
+
+        mockMvc.perform(post("/api/v1/identities/visitor")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Ana\",\"email\":\"ana@x.com\",\"reason_for_visit\":\"meeting\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.anonymousId").value(anon.toString()));
+
+        verify(vaultService).getOrCreateAnonymousId("VISITOR|ana@x.com|Ana|meeting");
+    }
 
     @Test
     @WithMockUser(authorities = "identity:lookup")

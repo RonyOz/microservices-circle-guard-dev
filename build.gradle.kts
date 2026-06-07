@@ -66,6 +66,19 @@ extensions.configure<JavaPluginExtension> {
             xml.required.set(true)
             html.required.set(true)
         }
+        // Exclude framework boilerplate with no testable branches from the
+        // coverage denominator: Spring Boot entry points and config classes.
+        classDirectories.setFrom(
+            files(classDirectories.files.map {
+                fileTree(it) {
+                    exclude(
+                        "**/*Application*",
+                        "**/config/**",
+                        "**/configuration/**"
+                    )
+                }
+            })
+        )
     }
 
     // Copy dependency jars into build/sonar-libs so the standalone SonarScanner CLI
