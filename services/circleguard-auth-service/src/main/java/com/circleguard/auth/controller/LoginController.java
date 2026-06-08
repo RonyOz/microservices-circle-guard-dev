@@ -5,12 +5,14 @@ import com.circleguard.auth.client.IdentityClient;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/auth")
 public class LoginController {
@@ -41,18 +43,18 @@ public class LoginController {
         String username = request.get("username");
         String password = request.get("password");
         
-        System.out.println("Login attempt for user: " + username + " (pass length: " + (password != null ? password.length() : 0) + ")");
+        log.info("Login attempt for user: {}", username);
 
         try {
             // 1. Authenticate (Dual-Chain)
             Authentication auth = authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, password)
             );
-            System.out.println("Authentication successful for: " + username);
+            log.debug("Authentication successful for user: {}", username);
 
             // 2. Anonymize (Fetch/Create Anonymous ID from Identity Service)
             UUID anonymousId = identityClient.getAnonymousId(username);
-            System.out.println("Anonymous ID retrieved: " + anonymousId);
+            log.debug("Anonymous identity resolved for user: {}", username);
 
             // 3. Issue Token
             String token = jwtService.generateToken(anonymousId, auth);
@@ -65,12 +67,11 @@ public class LoginController {
             ));
         } catch (org.springframework.security.core.AuthenticationException e) {
             loginFailureCounter.increment();
-            System.err.println("Authentication failed for " + username + ": " + e.getMessage());
+            log.warn("Authentication failed for {}: {}", username, e.getMessage());
             return ResponseEntity.status(401).body(Map.of("message", "Invalid username or password"));
         } catch (Exception e) {
-            System.err.println("Unexpected error during login for " + username + ":");
-            e.printStackTrace();
-            return ResponseEntity.status(500).body(Map.of("message", "Internal server error: " + e.getMessage()));
+            log.error("Unexpected error during login for {}", username, e);
+            return ResponseEntity.status(500).body(Map.of("message", "Internal server error"));
         }
     }
 
