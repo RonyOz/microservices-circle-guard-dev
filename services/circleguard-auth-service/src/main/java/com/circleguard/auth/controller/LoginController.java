@@ -75,26 +75,20 @@ public class LoginController {
     }
 
     @PostMapping("/visitor/handoff")
-    public ResponseEntity<Map<String, String>> generateVisitorHandoff(@RequestBody Map<String, String> request) {
-        String anonymousIdStr = request.get("anonymousId");
-        if (anonymousIdStr == null) {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<Map<String, String>> generateVisitorHandoff(Authentication authentication) {
+        // The identity comes from the authenticated principal (JWT subject = anonymousId),
+        // never from a client-supplied id — otherwise any caller could mint a token for
+        // an arbitrary identity (impersonation).
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "Authentication required"));
         }
-        
-        UUID anonymousId = UUID.fromString(anonymousIdStr);
-        
-        // Create a dummy authentication for the visitor
-        Authentication visitorAuth = new UsernamePasswordAuthenticationToken(
-                anonymousIdStr, 
-                null, 
-                List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("VISITOR"))
-        );
-        
-        String token = jwtService.generateToken(anonymousId, visitorAuth);
-        
+
+        UUID anonymousId = UUID.fromString(authentication.getName());
+        String token = jwtService.generateToken(anonymousId, authentication);
+
         return ResponseEntity.ok(Map.of(
                 "token", token,
-                "handoffPayload", "HANDOFF_TOKEN:" + anonymousId.toString() + ":" + token
+                "handoffPayload", "HANDOFF_TOKEN:" + anonymousId + ":" + token
         ));
     }
 }
