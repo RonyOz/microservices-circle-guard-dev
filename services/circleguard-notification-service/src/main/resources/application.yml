@@ -11,6 +11,8 @@ spring:
       mail.smtp.starttls.enable: false
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    listener:
+      observation-enabled: true
     consumer:
       group-id: notification-group
       auto-offset-reset: earliest

@@ -19,6 +19,10 @@ spring:
       password: ${NEO4J_PASSWORD:password}
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    template:
+      observation-enabled: true
+    listener:
+      observation-enabled: true
     consumer:
       group-id: promotion-service-group
       auto-offset-reset: earliest
