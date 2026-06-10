@@ -23,6 +23,10 @@ public class QrValidationService {
     private static final String STATUS_KEY_PREFIX = "user:status:";
 
     public ValidationResult validateToken(String token) {
+        if (token == null || token.isBlank()) {
+            meterRegistry.counter("circleguard.qr.validations", "result", "invalid").increment();
+            return new ValidationResult(false, "RED", "Invalid or Expired Token");
+        }
         try {
             Key key = Keys.hmacShaKeyFor(qrSecret.getBytes());
             Claims claims = Jwts.parserBuilder()
