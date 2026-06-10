@@ -13,6 +13,10 @@ COPY . .
 RUN npx expo export --platform web --output-dir dist
 
 FROM nginx:1.27-alpine AS runtime
+# Patch base-OS packages (libssl3/libpng/musl/zlib/...) to the latest in the
+# alpine 3.21 branch so the Trivy prod gate (HIGH/CRITICAL, fixed-only) passes.
+# These CVEs are in the base image, not the app; apk upgrade applies the backports.
+RUN apk upgrade --no-cache
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
