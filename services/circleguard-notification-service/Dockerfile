@@ -13,4 +13,3 @@ WORKDIR /app
 COPY --from=build /workspace/services/circleguard-notification-service/build/libs/*.jar app.jar
 EXPOSE 8082
 ENTRYPOINT ["java", "-jar", "app.jar"]
-# trigger deploy
