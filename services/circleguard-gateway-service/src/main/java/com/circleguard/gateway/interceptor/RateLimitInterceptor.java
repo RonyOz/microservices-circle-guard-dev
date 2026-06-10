@@ -4,6 +4,8 @@ import com.circleguard.gateway.config.RateLimiterProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -19,6 +21,7 @@ import java.util.UUID;
  * Entries older than the window are pruned before counting.
  * Exceeding the limit returns HTTP 429 with Retry-After header.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RateLimitInterceptor implements HandlerInterceptor {
@@ -38,16 +41,24 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         long windowMs = (long) properties.getWindowSeconds() * 1000;
         long windowStart = now - windowMs;
 
-        // Remove expired entries outside the sliding window
-        redisTemplate.opsForZSet().removeRangeByScore(key, 0, windowStart);
+        Long count;
+        try {
+            // Remove expired entries outside the sliding window
+            redisTemplate.opsForZSet().removeRangeByScore(key, 0, windowStart);
 
-        // Add current request — UUID member prevents score deduplication
-        redisTemplate.opsForZSet().add(key, UUID.randomUUID().toString(), now);
+            // Add current request — UUID member prevents score deduplication
+            redisTemplate.opsForZSet().add(key, UUID.randomUUID().toString(), now);
 
-        // Extend TTL to cover the full window
-        redisTemplate.expire(key, Duration.ofSeconds(properties.getWindowSeconds() + 1));
+            // Extend TTL to cover the full window
+            redisTemplate.expire(key, Duration.ofSeconds(properties.getWindowSeconds() + 1));
 
-        Long count = redisTemplate.opsForZSet().zCard(key);
+            count = redisTemplate.opsForZSet().zCard(key);
+        } catch (DataAccessException e) {
+            // Fail-open: losing rate limiting must not take the gate down with it.
+            log.warn("Rate limiter unavailable (Redis): {}", e.getMessage());
+            return true;
+        }
+
         if (count != null && count > properties.getRequestsPerWindow()) {
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             response.setHeader("Retry-After", String.valueOf(properties.getWindowSeconds()));

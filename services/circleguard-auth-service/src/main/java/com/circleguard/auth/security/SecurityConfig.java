@@ -21,12 +21,18 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthFilter) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .cors(org.springframework.security.config.Customizer.withDefaults())
             .headers(headers -> headers.frameOptions(frame -> frame.disable()))
-            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+            .sessionManagement(sm -> sm.sessionCreationPolicy(
+                    org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/api/v1/auth/login", "/actuator/**").permitAll()
+                    .anyRequest().authenticated())
+            .addFilterBefore(jwtAuthFilter,
+                    org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -52,12 +58,14 @@ public class SecurityConfig {
     @Bean
     public LdapContextSource contextSource(
             @org.springframework.beans.factory.annotation.Value("${ldap.host:localhost}") String host,
-            @org.springframework.beans.factory.annotation.Value("${ldap.port:389}") String port) {
+            @org.springframework.beans.factory.annotation.Value("${ldap.port:389}") String port,
+            @org.springframework.beans.factory.annotation.Value("${spring.ldap.username:cn=admin,dc=circleguard,dc=edu}") String userDn,
+            @org.springframework.beans.factory.annotation.Value("${spring.ldap.password:admin}") String password) {
         LdapContextSource contextSource = new LdapContextSource();
         contextSource.setUrl("ldap://" + host + ":" + port);
         contextSource.setBase("dc=circleguard,dc=edu");
-        contextSource.setUserDn("cn=admin,dc=circleguard,dc=edu");
-        contextSource.setPassword("admin");
+        contextSource.setUserDn(userDn);
+        contextSource.setPassword(password);
         return contextSource;
     }
 
