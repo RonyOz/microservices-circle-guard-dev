@@ -27,7 +27,13 @@ public class IdentityClient {
     private String identityBaseUrl;
 
     public IdentityClient(RestTemplateBuilder builder) {
-        this.restTemplate = builder.build();
+        // Without explicit timeouts a network partition makes calls hang
+        // indefinitely, so no exception ever reaches the circuit breaker and
+        // it can never open. Timeouts turn an outage into countable failures.
+        this.restTemplate = builder
+                .setConnectTimeout(java.time.Duration.ofSeconds(2))
+                .setReadTimeout(java.time.Duration.ofSeconds(3))
+                .build();
     }
 
     @CircuitBreaker(name = CB, fallbackMethod = "getAnonymousIdFallback")
