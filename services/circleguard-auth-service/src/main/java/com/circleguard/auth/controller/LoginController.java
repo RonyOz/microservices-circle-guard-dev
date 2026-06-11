@@ -76,15 +76,26 @@ public class LoginController {
     }
 
     @PostMapping("/visitor/handoff")
-    public ResponseEntity<Map<String, String>> generateVisitorHandoff(Authentication authentication) {
-        // The identity comes from the authenticated principal (JWT subject = anonymousId),
-        // never from a client-supplied id — otherwise any caller could mint a token for
-        // an arbitrary identity (impersonation).
+    public ResponseEntity<Map<String, String>> generateVisitorHandoff(
+            @RequestBody(required = false) Map<String, String> request,
+            Authentication authentication) {
+        // Minting requires an authenticated caller — an anonymous endpoint would let
+        // anyone issue a token for an arbitrary identity (impersonation). Authenticated
+        // staff may hand off to a visitor id supplied in the body (kiosk flow); with no
+        // body the principal's own anonymousId is used.
         if (authentication == null || authentication.getName() == null) {
             return ResponseEntity.status(401).body(Map.of("message", "Authentication required"));
         }
 
-        UUID anonymousId = UUID.fromString(authentication.getName());
+        String requestedId = request != null ? request.get("anonymousId") : null;
+        UUID anonymousId;
+        try {
+            anonymousId = (requestedId != null && !requestedId.isBlank())
+                    ? UUID.fromString(requestedId)
+                    : UUID.fromString(authentication.getName());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Invalid anonymousId"));
+        }
         String token = jwtService.generateToken(anonymousId, authentication);
 
         return ResponseEntity.ok(Map.of(
