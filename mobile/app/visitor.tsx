@@ -7,12 +7,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Shield } from 'lucide-react-native';
 
 import { IDENTITY_BASE_URL, AUTH_BASE_URL } from '../constants/Config';
+import { useAuth } from '../hooks/useAuth';
 const IDENTITY_URL = `${IDENTITY_BASE_URL}/api/v1/identities/visitor`;
 const AUTH_URL = `${AUTH_BASE_URL}/api/v1/auth/visitor/handoff`;
 
 export default function VisitorRegistrationScreen() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= 768;
+  const { token } = useAuth();
   
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -27,7 +29,13 @@ export default function VisitorRegistrationScreen() {
       setError('Please fill in all fields.');
       return;
     }
-    
+
+    if (!token) {
+      setError('Staff login required to issue visitor passes.');
+      return;
+    }
+
+
     setIsLoading(true);
     setError(null);
     
@@ -43,6 +51,8 @@ export default function VisitorRegistrationScreen() {
       // 2. Request Handoff Token from Auth Service
       const authResponse = await axios.post(AUTH_URL, {
         anonymousId
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       setHandoffToken(authResponse.data.handoffPayload);

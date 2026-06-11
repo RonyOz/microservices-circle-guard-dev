@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
+import { AUTH_BASE_URL } from '@/constants/Config';
+import { useAuth } from './useAuth';
 
 /**
  * Hook to fetch and rotate short-lived Campus Entry QR tokens.
  * Implements Story 2.2: Rotating Token logic.
  */
 export const useQrToken = (anonymousId: string | null) => {
+  const { token: authToken } = useAuth();
   const [token, setToken] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(60);
 
   useEffect(() => {
-    if (!anonymousId) return;
+    if (!anonymousId || !authToken) return;
 
     fetchToken();
     const timer = setInterval(() => {
@@ -23,15 +26,19 @@ export const useQrToken = (anonymousId: string | null) => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [anonymousId]);
+  }, [anonymousId, authToken]);
 
   const fetchToken = async () => {
     try {
-      // In a real app: const res = await api.get('/auth/qr/generate');
-      // For now, generating a fake JWT-like string
-      const fakeToken = `eyJhbm9uSWQiOiI${Math.random().toString(36).substring(7)}`;
-      setToken(fakeToken);
-      setTimeLeft(60);
+      const res = await fetch(`${AUTH_BASE_URL}/api/v1/auth/qr/generate`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      if (!res.ok) {
+        throw new Error(`QR generation failed: ${res.status}`);
+      }
+      const data = await res.json();
+      setToken(data.qrToken);
+      setTimeLeft(Number(data.expiresIn) || 60);
     } catch (e) {
       console.error('QR Fetch Failed', e);
     }
