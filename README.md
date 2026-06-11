@@ -62,25 +62,6 @@ CircleGuard follows a **Microservice Architecture** built on a **Hybrid Data Mod
 | **Mobile/Web** | Expo (React Native) | Unified codebase across iOS, Android, and Browser. |
 | **Infra** | Kubernetes (AWS EKS) | Orchestration for high availability and auto-scaling. |
 
----
-
-## Roadmap
-
-### Phase 1: MVP — The Intelligence Core (Current)
-- [x] Status Promotion Machine (Suspect → Probable → Confirmed).
-- [x] Temporal graph with 14-day TTL edges.
-- [x] Multi-channel fence notifications (Push/Email/SMS).
-- [ ] Health Center de-identification console.
-
-### Phase 2: Growth — Spatial Intelligence
-- [ ] WiFi AP triangulation integration.
-- [ ] Campus entry validation (Gatekeeper) QR integration.
-- [ ] LMS integration for "Remote Attendance" status automation.
-
-### Phase 3: Vision — Full Ecosystem
-- [ ] Off-campus circle detection via P2P Bluetooth.
-- [ ] Global Health Dashboard with hotspot visualization.
-- [ ] Lab API bridge for automated test result ingestion.
 
 ---
 
