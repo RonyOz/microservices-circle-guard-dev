@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.0-promotion-service](https://github.com/RonyOz/microservices-circle-guard-dev/compare/v1.1.0-promotion-service...v1.2.0-promotion-service) (2026-06-11)
+
+
+### Features
+
+* enhance visitor handoff endpoint to support optional anonymousId in request body ([02256e9](https://github.com/RonyOz/microservices-circle-guard-dev/commit/02256e9cac52a14a5af2c5c239472ac9345e00d0))
+* integrate authentication and improve API routing in visitor registration and QR token generation ([d5d44eb](https://github.com/RonyOz/microservices-circle-guard-dev/commit/d5d44eb663c3aa840516bc7b1d7d0ca36f72ec86))
+
+
+### Bug Fixes
+
+* update QR token expiration to use environment variable for consistency ([9a716fc](https://github.com/RonyOz/microservices-circle-guard-dev/commit/9a716fc6bb806c44fb3de5b6ea81a2368fdd5913))
+
 ## [1.1.0-promotion-service](https://github.com/RonyOz/microservices-circle-guard-dev/compare/1.0.0-promotion-service...v1.1.0-promotion-service) (2026-06-10)
 
 
